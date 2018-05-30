@@ -83,10 +83,10 @@ defmodule Liquid.Combinators.Tags.For do
     |> tag(:reversed_param)
   end
 
-  def for_sentences do
+  def for_body do
     empty()
     |> optional(parsec(:__parse__))
-    |> tag(:for_sentences)
+    |> tag(:for_body)
   end
 
   def forloop_first, do: Variable.define("forloop.first")
@@ -103,7 +103,7 @@ defmodule Liquid.Combinators.Tags.For do
 
   def forloop_rindex0, do: Variable.define("forloop.rindex0")
 
-  def forloop_objects do
+  def forloop_variables do
     empty()
     |> choice([
         parsec(:forloop_first),
@@ -122,15 +122,15 @@ defmodule Liquid.Combinators.Tags.For do
 
   def break_tag, do:  Tag.define_open("break")
 
-  def tag, do: Tag.define_closed("for", &predicate/1, &body/1)
+  def tag, do: Tag.define_closed("for", &for_collection/1, &body/1)
 
   defp body(combinator) do
     combinator
-    |> parsec(:for_sentences)
+    |> parsec(:for_body)
     |> optional(parsec(:else_tag_for))
   end
 
-  defp predicate(combinator) do
+  defp for_collection(combinator) do
     combinator
     |> parsec(:variable_name)
     |> parsec(:ignore_whitespaces)
@@ -144,7 +144,7 @@ defmodule Liquid.Combinators.Tags.For do
          )
        )
     |> parsec(:ignore_whitespaces)
-    |> tag(:for_conditions)
+    |> tag(:for_collection)
   end
 end
 
