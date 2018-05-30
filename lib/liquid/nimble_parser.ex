@@ -9,6 +9,7 @@ defmodule Liquid.NimbleParser do
     Assign,
     Capture,
     Decrement,
+    For,
     Increment
   }
 
@@ -17,6 +18,8 @@ defmodule Liquid.NimbleParser do
   defparsec(:variable_name, General.variable_name())
   defparsec(:start_tag, General.start_tag())
   defparsec(:end_tag, General.end_tag())
+  defparsec(:start_variable, General.start_variable())
+  defparsec(:end_variable, General.end_variable())
   defparsec(:filter_param, General.filter_param())
   defparsec(:filter, General.filter())
   defparsec(:single_quoted_token, General.single_quoted_token())
@@ -49,7 +52,7 @@ defmodule Liquid.NimbleParser do
   defparsec(
     :__parse__,
     General.liquid_literal()
-    |> optional(choice([parsec(:liquid_tag), parsec(:liquid_variable)]))
+    |> optional(choice([parsec(:liquid_tag), parsec(:forloop_objects), parsec(:liquid_variable)]))
     |> traverse({:clean_empty_strings, []})
   )
 
@@ -58,13 +61,33 @@ defmodule Liquid.NimbleParser do
   defparsec(:decrement, Decrement.tag())
   defparsec(:increment, Increment.tag())
 
+  defparsecp(:forloop_index0, For.forloop_index0())
+  defparsecp(:forloop_index, For.forloop_index())
+  defparsecp(:forloop_last, For.forloop_last())
+  defparsecp(:forloop_length, For.forloop_length())
+  defparsecp(:forloop_rindex, For.forloop_rindex())
+  defparsecp(:forloop_rindex0, For.forloop_rindex0())
+  defparsecp(:forloop_first, For.forloop_first())
+  defparsecp(:forloop_objects, For.forloop_objects())
+  defparsecp(:offset_param, For.offset_param())
+  defparsecp(:limit_param, For.limit_param())
+  defparsecp(:reversed_param, For.reversed_param())
+  defparsecp(:else_tag_for, For.else_tag())
+  defparsecp(:for_sentences, For.for_sentences())
+  defparsec(:break_tag_for, For.break_tag())
+  defparsec(:continue_tag_for, For.continue_tag())
+  defparsec(:for, For.tag())
+
   defparsec(
     :liquid_tag,
     choice([
       parsec(:assign),
       parsec(:capture),
       parsec(:increment),
-      parsec(:decrement)
+      parsec(:decrement),
+      parsec(:break_tag_for),
+      parsec(:continue_tag_for),
+      parsec(:for)
     ])
   )
 
