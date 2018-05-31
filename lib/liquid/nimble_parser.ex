@@ -52,7 +52,9 @@ defmodule Liquid.NimbleParser do
   defparsec(
     :__parse__,
     General.liquid_literal()
-    |> optional(choice([parsec(:liquid_tag), parsec(:forloop_variables), parsec(:liquid_variable)]))
+    |> optional(
+      choice([parsec(:liquid_tag), parsec(:forloop_variables), parsec(:liquid_variable)])
+    )
     |> traverse({:clean_empty_strings, []})
   )
 
@@ -61,21 +63,11 @@ defmodule Liquid.NimbleParser do
   defparsec(:decrement, Decrement.tag())
   defparsec(:increment, Increment.tag())
 
-  defparsecp(:forloop_index0, For.forloop_index0())
-  defparsecp(:forloop_index, For.forloop_index())
-  defparsecp(:forloop_last, For.forloop_last())
-  defparsecp(:forloop_length, For.forloop_length())
-  defparsecp(:forloop_rindex, For.forloop_rindex())
-  defparsecp(:forloop_rindex0, For.forloop_rindex0())
-  defparsecp(:forloop_first, For.forloop_first())
   defparsecp(:forloop_variables, For.forloop_variables())
   defparsecp(:offset_param, For.offset_param())
   defparsecp(:limit_param, For.limit_param())
-  defparsecp(:reversed_param, For.reversed_param())
-  defparsecp(:else_tag_for, For.else_tag())
-  defparsecp(:for_body, For.for_body())
-  defparsec(:break_tag_for, For.break_tag())
-  defparsec(:continue_tag_for, For.continue_tag())
+  defparsec(:break_tag, For.break_tag())
+  defparsec(:continue_tag, For.continue_tag())
   defparsec(:for, For.tag())
 
   defparsec(
@@ -85,8 +77,8 @@ defmodule Liquid.NimbleParser do
       parsec(:capture),
       parsec(:increment),
       parsec(:decrement),
-      parsec(:break_tag_for),
-      parsec(:continue_tag_for),
+      parsec(:break_tag),
+      parsec(:continue_tag),
       parsec(:for)
     ])
   )
