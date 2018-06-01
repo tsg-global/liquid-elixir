@@ -53,7 +53,7 @@ defmodule Liquid.NimbleParser do
     :__parse__,
     General.liquid_literal()
     |> optional(
-      choice([parsec(:liquid_tag), parsec(:forloop_variables), parsec(:liquid_variable)])
+      choice([parsec(:liquid_tag), parsec(:liquid_variable)])
     )
     |> traverse({:clean_empty_strings, []})
   )
@@ -63,7 +63,6 @@ defmodule Liquid.NimbleParser do
   defparsec(:decrement, Decrement.tag())
   defparsec(:increment, Increment.tag())
 
-  defparsecp(:forloop_variables, For.forloop_variables())
   defparsecp(:offset_param, For.offset_param())
   defparsecp(:limit_param, For.limit_param())
   defparsec(:break_tag, For.break_tag())

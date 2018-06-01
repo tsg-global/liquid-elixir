@@ -194,31 +194,8 @@ defmodule Liquid.Combinators.Tags.ForTest do
     )
 
     test_combinator_error(
-      "{% for i in (my_var..product.title[2]) %}{{ i }}{% else %}{% endfor %}",
+      "{% for i in (my_var..) %}{{ i }}{% else %}{% endfor %}",
       &Parser.for/1
     )
-  end
-
-  test "for tag: forloop variables" do
-    forloop_variables = [
-      "forloop.first",
-      "forloop.index",
-      "forloop.index0",
-      "forloop.last",
-      "forloop.length",
-      "forloop.rindex",
-      "forloop.rindex0"
-    ]
-
-    Enum.each(forloop_variables, fn forloop_variable ->
-      test_combinator(
-        "{% for item in array %}{{ #{forloop_variable} }}{% endfor %}",
-        &Parser.for/1,
-        for: [
-          for_collection: [variable_name: "item", value: {:variable, ["array"]}],
-          for_body: ["#{forloop_variable}": []]
-        ]
-      )
-    end)
   end
 end
