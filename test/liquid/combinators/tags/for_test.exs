@@ -12,18 +12,17 @@ defmodule Liquid.Combinators.Tags.ForTest do
     ]
 
     Enum.each(tags, fn tag ->
-      test_combinator(tag, &Parser.for/1, [
-        {
-          :for,
-          [
-            for_collection: [
-              variable_name: "item",
-              value: {:variable, ["array"]}
-            ],
-            for_body: []
-          ]
-        }
-      ])
+      test_combinator(
+        tag,
+        &Parser.for/1,
+        for: [
+          for_collection: [
+            variable_name: ["item"],
+            value: {:variable, [parts: [part: "array"]]}
+          ],
+          for_body: []
+        ]
+      )
     end)
   end
 
@@ -40,8 +39,8 @@ defmodule Liquid.Combinators.Tags.ForTest do
         &Parser.for/1,
         for: [
           for_collection: [
-            variable_name: "item",
-            value: {:variable, ["array"]}
+            variable_name: ["item"],
+            value: {:variable, [parts: [part: "array"]]}
           ],
           for_body: [],
           else: []
@@ -64,8 +63,8 @@ defmodule Liquid.Combinators.Tags.ForTest do
         &Parser.for/1,
         for: [
           for_collection: [
-            variable_name: "item",
-            value: {:variable, ["array"]},
+            variable_name: ["item"],
+            value: {:variable, [parts: [part: "array"]]},
             limit_param: [2]
           ],
           for_body: [],
@@ -88,8 +87,8 @@ defmodule Liquid.Combinators.Tags.ForTest do
         &Parser.for/1,
         for: [
           for_collection: [
-            variable_name: "item",
-            value: {:variable, ["array"]},
+            variable_name: ["item"],
+            value: {:variable, [parts: [part: "array"]]},
             offset_param: [2]
           ],
           for_body: [],
@@ -112,8 +111,8 @@ defmodule Liquid.Combinators.Tags.ForTest do
         &Parser.for/1,
         for: [
           for_collection: [
-            variable_name: "item",
-            value: {:variable, ["array"]},
+            variable_name: ["item"],
+            value: {:variable, [parts: [part: "array"]]},
             reversed_param: []
           ],
           for_body: [],
@@ -136,10 +135,12 @@ defmodule Liquid.Combinators.Tags.ForTest do
         &Parser.for/1,
         for: [
           for_collection: [
-            variable_name: "i",
+            variable_name: ["i"],
             value: {:range, [start: 1, end: 10]}
           ],
-          for_body: [variable: ["i"]]
+          for_body: [
+            liquid_variable: [variable: [parts: [part: "i"]]]
+          ]
         ]
       )
     end)
@@ -151,10 +152,17 @@ defmodule Liquid.Combinators.Tags.ForTest do
       &Parser.for/1,
       for: [
         for_collection: [
-          variable_name: "i",
-          value: {:range, [start: {:variable, ["my_var"]}, end: 10]}
+          variable_name: ["i"],
+          value:
+            {:range,
+             [
+               start: {:variable, [parts: [part: "my_var"]]},
+               end: 10
+             ]}
         ],
-        for_body: [variable: ["i"]]
+        for_body: [
+          liquid_variable: [variable: [parts: [part: "i"]]]
+        ]
       ]
     )
   end
@@ -165,10 +173,18 @@ defmodule Liquid.Combinators.Tags.ForTest do
       &Parser.for/1,
       for: [
         for_collection: [
-          variable_name: "i",
-          value: {:range, [start: {:variable, ["my_var"]}, end: 10]}
+          variable_name: ["i"],
+          value:
+            {:range,
+             [
+               start: {:variable, [parts: [part: "my_var"]]},
+               end: 10
+             ]}
         ],
-        for_body: [variable: ["i"], break: []]
+        for_body: [
+          liquid_variable: [variable: [parts: [part: "i"]]],
+          break: []
+        ]
       ]
     )
   end
@@ -179,10 +195,18 @@ defmodule Liquid.Combinators.Tags.ForTest do
       &Parser.for/1,
       for: [
         for_collection: [
-          variable_name: "i",
-          value: {:range, [start: 1, end: {:variable, ["my_var"]}]}
+          variable_name: ["i"],
+          value:
+            {:range,
+             [
+               start: 1,
+               end: {:variable, [parts: [part: "my_var"]]}
+             ]}
         ],
-        for_body: [variable: ["i"], continue: []]
+        for_body: [
+          liquid_variable: [variable: [parts: [part: "i"]]],
+          continue: []
+        ]
       ]
     )
   end

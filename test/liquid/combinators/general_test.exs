@@ -4,7 +4,7 @@ defmodule Liquid.Combinators.GeneralTest do
 
   defmodule Parser do
     import NimbleParsec
-    alias Liquid.Combinators.General
+    alias Liquid.Combinators.{General, LexicalToken}
     defparsec(:whitespace, General.whitespace())
     defparsec(:liquid_literal, General.liquid_literal())
     defparsec(:ignore_whitespaces, General.ignore_whitespaces())
@@ -14,11 +14,22 @@ defmodule Liquid.Combinators.GeneralTest do
     defparsec(:end_variable, General.end_variable())
     defparsec(:variable_definition, General.variable_definition())
     defparsec(:variable_name, General.variable_name())
+    defparsec(:filter, General.filter())
+    defparsec(:filter_param, General.filter_param())
+    defparsec(:filters, General.filters())
+    defparsec(:value, LexicalToken.value())
+    defparsec(:value_definition, LexicalToken.value_definition())
+    defparsec(:object_property, LexicalToken.object_property())
+    defparsec(:variable_value, LexicalToken.variable_value())
+    defparsec(:object_value, LexicalToken.object_value())
+    defparsec(:variable_part, LexicalToken.variable_part())
   end
 
   test "whitespace must parse 0x0020 and 0x0009" do
     test_combinator(" ", &Parser.whitespace/1, ' ')
     test_combinator("\t", &Parser.whitespace/1, '\t')
+    test_combinator("\n", &Parser.whitespace/1, '\n')
+    test_combinator("\r", &Parser.whitespace/1, '\r')
   end
 
   test "literal: every utf8 valid character until open/close tag/variable" do
@@ -64,7 +75,7 @@ defmodule Liquid.Combinators.GeneralTest do
     valid_names = ~w(v v1 _v1 _1 v-1 v- v_ a)
 
     Enum.each(valid_names, fn n ->
-      test_combinator(n, &Parser.variable_name/1, variable_name: n)
+      test_combinator(n, &Parser.variable_name/1, variable_name: [n])
     end)
   end
 

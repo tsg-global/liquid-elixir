@@ -36,8 +36,8 @@ defmodule Liquid.Combinators.Tag do
   def define_open(tag_name, combinator_head \\ & &1) do
     tag_name
     |> open_definition(combinator_head)
-    |> optional(parsec(:__parse__))
     |> tag(String.to_atom(tag_name))
+    |> optional(parsec(:__parse__))
   end
 
   defp open_definition(tag_name, combinator) do
