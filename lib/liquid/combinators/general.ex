@@ -9,6 +9,8 @@ defmodule Liquid.Combinators.General do
   @space 0x0020
   @colon 0x003A
   @point 0x002E
+  @newline 0x000A
+  @carriage_return 0x000D
   @comma 0x002C
   @single_quote 0x0027
   @double_quote 0x0022
@@ -36,6 +38,8 @@ defmodule Liquid.Combinators.General do
       space: @space,
       colon: @colon,
       point: @point,
+      carriage_return: @carriage_return,
+      newline: @newline,
       comma: @comma,
       quote: @double_quote,
       single_quote: @single_quote,
@@ -53,11 +57,16 @@ defmodule Liquid.Combinators.General do
   end
 
   @doc """
-  Horizontal Tab (U+0009) + Space (U+0020)
+  Horizontal Tab (U+0009) +
+  Space (U+0020) +
+  Carriage Return (U+000D)
+  New Line (U+000A)
   """
   def whitespace do
     ascii_char([
       @horizontal_tab,
+      @carriage_return,
+      @newline,
       @space
     ])
   end
@@ -124,7 +133,8 @@ defmodule Liquid.Combinators.General do
   == != > < >= <=
   """
   def comparison_operators do
-    choice([
+    empty()
+    |> choice([
       string(@equals),
       string(@does_not_equal),
       string(@greater_than),
@@ -133,6 +143,11 @@ defmodule Liquid.Combinators.General do
       string(@less_or_equal),
       string("contains")
     ])
+    |> traverse({__MODULE__, :to_atom, []})
+  end
+
+  def to_atom(_rest, [h | _], context, _line, _offset) do
+    {h |> String.to_atom() |> List.wrap(), context}
   end
 
   @doc """
@@ -140,7 +155,24 @@ defmodule Liquid.Combinators.General do
   `and` `or`
   """
   def logical_operators do
-    choice([string("or"), string("and")])
+    empty()
+    |> choice([string("or"), string("and")])
+    |> traverse({__MODULE__, :to_atom, []})
+  end
+
+  def condition do
+    empty()
+    |> parsec(:value_definition)
+    |> parsec(:comparison_operators)
+    |> parsec(:value_definition)
+    |> reduce({List, :to_tuple, []})
+    |> unwrap_and_tag(:condition)
+  end
+
+  def logical_condition do
+    parsec(:logical_operators)
+    |> choice([parsec(:condition), parsec(:value_definition)])
+    |> tag(:logical)
   end
 
   # TODO: Check this `or` without `and`
@@ -215,14 +247,15 @@ defmodule Liquid.Combinators.General do
   """
   def variable_name do
     parsec(:variable_definition)
-    |> unwrap_and_tag(:variable_name)
+    |> tag(:variable_name)
   end
 
- def liquid_variable do
+  def liquid_variable do
     start_variable()
     |> parsec(:value_definition)
-    |> optional(parsec(:filter))
+    |> optional(times(parsec(:filters), min: 1))
     |> concat(end_variable())
+    |> tag(:liquid_variable)
     |> optional(parsec(:__parse__))
   end
 
@@ -260,8 +293,12 @@ defmodule Liquid.Combinators.General do
     |> optional(ignore(utf8_char([@comma])))
     |> optional(parsec(:ignore_whitespaces))
     |> optional(parsec(:value))
-    |> tag(:filter_param)
-    |> optional(parsec(:filter))
+    |> tag(:params)
+  end
+
+  def filters do
+    times(parsec(:filter), min: 1)
+    |> tag(:filters)
   end
 
   @doc """
@@ -269,10 +306,17 @@ defmodule Liquid.Combinators.General do
   start char: ':' plus optional: parameters values [value]
   """
   def filter do
-    empty()
+    parsec(:ignore_whitespaces)
     |> ignore(string(@start_filter))
     |> parsec(:ignore_whitespaces)
-    |> parsec(:variable_definition)
+    |> repeat_until(utf8_char([]), [
+      string(@start_filter),
+      string(@end_variable),
+      string(":"),
+      string(" ")
+    ])
+    |> parsec(:ignore_whitespaces)
+    |> reduce({List, :to_string, []})
     |> optional(parsec(:filter_param))
     |> tag(:filter)
     |> optional(parsec(:filter))

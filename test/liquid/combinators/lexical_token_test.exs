@@ -53,31 +53,73 @@ defmodule Liquid.Combinators.LexicalTokenTest do
   end
 
   test "range values" do
-    test_combinator("(10..1)", &Parser.range_value/1, range_value: [start: 10, end: 1])
-    test_combinator("(-10..1)", &Parser.range_value/1, range_value: [start: -10, end: 1])
-    test_combinator("(1..10)", &Parser.range_value/1, range_value: [start: 1, end: 10])
-    test_combinator("(1..var)", &Parser.range_value/1, range_value: [start: 1, end: "var"])
+    test_combinator(
+      "(10..1)",
+      &Parser.value/1,
+      value: {:range, [start: 10, end: 1]}
+    )
+
+    test_combinator("(-10..1)", &Parser.value/1, value: {:range, [start: -10, end: 1]})
+    test_combinator("(1..10)", &Parser.value/1, value: {:range, [start: 1, end: 10]})
 
     test_combinator(
-      "(var..10)",
-      &Parser.range_value/1,
-      range_value: [{:start, "var"}, {:end, 10}]
+      "(1..var)",
+      &Parser.value/1,
+      value: {:range, [start: 1, end: {:variable, [parts: [part: "var"]]}]}
     )
 
     test_combinator(
-      "(var1..var2)",
-      &Parser.range_value/1,
-      range_value: [{:start, "var1"}, {:end, "var2"}]
+      "(var[0]..10)",
+      &Parser.value/1,
+      value:
+        {:range,
+         [
+           start: {:variable, [parts: [part: "var", index: 0]]},
+           end: 10
+         ]}
+    )
+
+    test_combinator(
+      "(var1[0].var2[0]..var3[0])",
+      &Parser.value/1,
+      value:
+        {:range,
+         [
+           start:
+             {:variable,
+              [
+                parts: [
+                  part: "var1",
+                  index: 0,
+                  part: "var2",
+                  index: 0
+                ]
+              ]},
+           end: {:variable, [parts: [part: "var3", index: 0]]}
+         ]}
     )
   end
 
   test "object values" do
-    test_combinator("variable", &Parser.value/1, value: {:variable, ["variable"]})
-    test_combinator("variable.value", &Parser.value/1, value: {:variable, ["variable", "value"]})
+    test_combinator(
+      "variable",
+      &Parser.value/1,
+      value: {:variable, [parts: [part: "variable"]]}
+    )
+
+    test_combinator(
+      "variable.value",
+      &Parser.value/1,
+      value: {:variable, [parts: [part: "variable", part: "value"]]}
+    )
   end
 
   test "list values" do
-    test_combinator("product[0]", &Parser.value/1, value: {:variable, ["product", {:index, 0}]})
+    test_combinator(
+      "product[0]",
+      &Parser.value/1,
+      value: {:variable, [parts: [part: "product", index: 0]]}
+    )
   end
 
   test "object and list values" do
@@ -85,7 +127,17 @@ defmodule Liquid.Combinators.LexicalTokenTest do
       "products[0].parts[0].providers[0]",
       &Parser.value/1,
       value:
-        {:variable, ["products", {:index, 0}, "parts", {:index, 0}, "providers", {:index, 0}]}
+        {:variable,
+         [
+           parts: [
+             part: "products",
+             index: 0,
+             part: "parts",
+             index: 0,
+             part: "providers",
+             index: 0
+           ]
+         ]}
     )
 
     test_combinator(
@@ -93,7 +145,46 @@ defmodule Liquid.Combinators.LexicalTokenTest do
       &Parser.value/1,
       value:
         {:variable,
-         ["products", {:index, {:variable, ["parts", {:index, 0}, "providers", {:index, 0}]}}]}
+         [
+           parts: [
+             part: "products",
+             index:
+               {:variable,
+                [
+                  parts: [
+                    part: "parts",
+                    index: 0,
+                    part: "providers",
+                    index: 0
+                  ]
+                ]}
+           ]
+         ]}
+    )
+  end
+
+  test "variable with filters and params" do
+    test_combinator(
+      "{{ var.var1[0][0].var2[3] | filter1 | f2: 1 | f3: 2 | f4: 2, 3 }}",
+      &Parser.liquid_variable/1,
+      liquid_variable: [
+        variable: [
+          parts: [
+            part: "var",
+            part: "var1",
+            index: 0,
+            index: 0,
+            part: "var2",
+            index: 3
+          ],
+          filters: [
+            filter: ["filter1"],
+            filter: ["f2", {:params, [value: 1]}],
+            filter: ["f3", {:params, [value: 2]}],
+            filter: ["f4", {:params, [value: 2, value: 3]}]
+          ]
+        ]
+      ]
     )
   end
 end
