@@ -8,8 +8,10 @@ defmodule Liquid.NimbleParser do
   alias Liquid.Combinators.Tags.{
     Assign,
     Capture,
+    Case,
     Decrement,
     For,
+    Generic,
     Increment
   }
 
@@ -28,7 +30,7 @@ defmodule Liquid.NimbleParser do
   defparsec(:quoted_token, General.quoted_token())
   defparsec(:comparison_operators, General.comparison_operators())
   defparsec(:logical_operators, General.logical_operators())
-  defparsec(:comma_contition_value, General.comma_contition_value())
+  defparsec(:logical_operator_coma, General.logical_operator_coma())
   defparsec(:ignore_whitespaces, General.ignore_whitespaces())
   defparsec(:condition, General.condition())
   defparsec(:logical_condition, General.logical_condition())
@@ -72,6 +74,9 @@ defmodule Liquid.NimbleParser do
   defparsec(:continue_tag, For.continue_tag())
   defparsec(:for, For.tag())
 
+  defparsec(:case, Case.tag())
+  defparsec(:whens, Case.whens())
+
   defparsec(
     :liquid_tag,
     choice([
@@ -81,7 +86,8 @@ defmodule Liquid.NimbleParser do
       parsec(:decrement),
       parsec(:break_tag),
       parsec(:continue_tag),
-      parsec(:for)
+      parsec(:for),
+      parsec(:case),
     ])
   )
 
