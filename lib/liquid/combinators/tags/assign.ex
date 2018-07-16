@@ -10,14 +10,15 @@ defmodule Liquid.Combinators.Tags.Assign do
   ```
   """
   import NimbleParsec
-  alias Liquid.Combinators.Tag
+  alias Liquid.Combinators.{General, Tag, LexicalToken}
+
+  @type t :: [assign: [variable_name: String.t(), value: LexicalToken.value()]]
 
   def tag do
     Tag.define_open("assign", fn combinator ->
       combinator
-      |> parsec(:variable_name)
-      |> ignore(string("="))
-      |> parsec(:value)
+      |> concat(General.assignment(General.codepoints().equal))
+      |> optional(General.filters())
     end)
   end
 end

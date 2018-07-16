@@ -49,35 +49,25 @@ defmodule Liquid.Combinators.Tags.For do
   """
   import NimbleParsec
   alias Liquid.Combinators.{General, Tag}
-
-  def offset_param do
-    empty()
-    |> parsec(:ignore_whitespaces)
-    |> ignore(string("offset"))
-    |> ignore(ascii_char([General.codepoints().colon]))
-    |> parsec(:ignore_whitespaces)
-    |> concat(choice([parsec(:number), parsec(:variable_definition)]))
-    |> parsec(:ignore_whitespaces)
-    |> tag(:offset_param)
-  end
-
-  def limit_param do
-    empty()
-    |> parsec(:ignore_whitespaces)
-    |> ignore(string("limit"))
-    |> ignore(ascii_char([General.codepoints().colon]))
-    |> parsec(:ignore_whitespaces)
-    |> concat(choice([parsec(:number), parsec(:variable_definition)]))
-    |> parsec(:ignore_whitespaces)
-    |> tag(:limit_param)
-  end
+  alias Liquid.Combinators.Tags.Generic
 
   defp reversed_param do
     empty()
     |> parsec(:ignore_whitespaces)
     |> ignore(string("reversed"))
     |> parsec(:ignore_whitespaces)
-    |> tag(:reversed_param)
+    |> tag(:reversed)
+  end
+
+  defp for_params do
+    empty()
+    |> optional(
+      times(
+        choice([General.tag_param("offset"), General.tag_param("limit"), reversed_param()]),
+        min: 1
+      )
+    )
+    |> tag(:for_params)
   end
 
   defp for_body do
@@ -90,28 +80,23 @@ defmodule Liquid.Combinators.Tags.For do
 
   def break_tag, do: Tag.define_open("break")
 
-  def tag, do: Tag.define_closed("for", &for_collection/1, &body/1)
+  def tag, do: Tag.define_closed("for", &for_statements/1, &body/1)
 
   defp body(combinator) do
     combinator
     |> concat(for_body())
-    |> optional(Tag.define_open("else"))
+    |> optional(Generic.else_tag())
   end
 
-  defp for_collection(combinator) do
+  defp for_statements(combinator) do
     combinator
-    |> parsec(:variable_name)
+    |> parsec(:variable_value)
     |> parsec(:ignore_whitespaces)
     |> ignore(string("in"))
     |> parsec(:ignore_whitespaces)
     |> parsec(:value)
-    |> optional(
-      times(
-        choice([offset_param(), reversed_param(), limit_param()]),
-        min: 1
-      )
-    )
+    |> optional(for_params())
     |> parsec(:ignore_whitespaces)
-    |> tag(:for_collection)
+    |> tag(:for_statements)
   end
 end

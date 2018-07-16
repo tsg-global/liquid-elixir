@@ -20,45 +20,29 @@ defmodule Liquid.Combinators.Tags.Case do
   ```
   """
   import NimbleParsec
-  alias Liquid.Combinators.Tag
+  alias Liquid.Combinators.{Tag, General}
   alias Liquid.Combinators.Tags.Generic
 
-  def tag, do: Tag.define_closed("case", &head/1, &body/1)
+  def tag, do: Tag.define_closed("case", &General.conditions/1, &body/1)
 
-  defp when_tag do
-    Tag.define_open("when", fn combinator ->
-      combinator
-      |> choice([
-        parsec(:condition),
-        parsec(:value_definition),
-        parsec(:quoted_token),
-        parsec(:variable_definition)
-      ])
-      |> optional(times(parsec(:logical_condition), min: 1))
-    end)
-  end
-
-  def whens do
+  def clauses do
     empty()
     |> times(when_tag(), min: 1)
-    |> tag(:whens)
+    |> tag(:clauses)
   end
 
-  defp head(combinator) do
-    combinator
-    |> choice([
-      parsec(:condition),
-      parsec(:value_definition),
-      parsec(:quoted_token),
-      parsec(:variable_definition)
-    ])
-    |> optional(times(parsec(:logical_condition), min: 1))
+  defp when_tag do
+    "when"
+    |> Tag.open_tag(&General.conditions/1)
+    |> tag(:statements)
+    |> concat(tag(optional(parsec(:__parse__)), :value_if_true))
+    |> tag(:when)
   end
 
   defp body(combinator) do
     combinator
     |> optional(parsec(:__parse__))
-    |> optional(parsec(:whens))
+    |> optional(parsec(:clauses))
     |> parsec(:ignore_whitespaces)
     |> optional(times(Generic.else_tag(), min: 1))
   end

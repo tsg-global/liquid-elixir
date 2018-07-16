@@ -12,6 +12,8 @@ defmodule Liquid.Combinators.GeneralTest do
     defparsec(:end_tag, General.end_tag())
     defparsec(:start_variable, General.start_variable())
     defparsec(:end_variable, General.end_variable())
+    defparsec(:variable_definition_for_assignation, General.variable_definition_for_assignation())
+    defparsec(:variable_name_for_assignation, General.variable_name_for_assignation())
     defparsec(:variable_definition, General.variable_definition())
     defparsec(:variable_name, General.variable_name())
     defparsec(:filter, General.filter())
@@ -39,8 +41,8 @@ defmodule Liquid.Combinators.GeneralTest do
 
     test_combinator("stop in {{", &Parser.liquid_literal/1, ["stop in "])
     test_combinator("stop in {%", &Parser.liquid_literal/1, ["stop in "])
-    test_combinator("stop in %}", &Parser.liquid_literal/1, ["stop in "])
-    test_combinator("stop in }}", &Parser.liquid_literal/1, ["stop in "])
+    test_combinator("stop in %}", &Parser.liquid_literal/1, ["stop in %}"])
+    test_combinator("stop in }}", &Parser.liquid_literal/1, ["stop in }}"])
     test_combinator("{{ this is not processed", &Parser.liquid_literal/1, [""])
     test_combinator("", &Parser.liquid_literal/1, [""])
   end
@@ -75,7 +77,7 @@ defmodule Liquid.Combinators.GeneralTest do
     valid_names = ~w(v v1 _v1 _1 v-1 v- v_ a)
 
     Enum.each(valid_names, fn n ->
-      test_combinator(n, &Parser.variable_name/1, variable_name: [n])
+      test_combinator(n, &Parser.variable_name/1, variable_name: n)
     end)
   end
 

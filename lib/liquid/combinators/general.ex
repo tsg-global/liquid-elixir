@@ -17,6 +17,7 @@ defmodule Liquid.Combinators.General do
   @question_mark 0x003F
   @underscore 0x005F
   @dash 0x002D
+  @equal 0x003D
   @start_tag "{%"
   @end_tag "%}"
   @start_variable "{{"
@@ -41,6 +42,7 @@ defmodule Liquid.Combinators.General do
       carriage_return: @carriage_return,
       newline: @newline,
       comma: @comma,
+      equal: @equal,
       quote: @double_quote,
       single_quote: @single_quote,
       question_mark: @question_mark,
@@ -146,28 +148,18 @@ defmodule Liquid.Combinators.General do
     |> traverse({__MODULE__, :to_atom, []})
   end
 
-  def to_atom(_rest, [h | _], context, _line, _offset) do
-    {h |> String.to_atom() |> List.wrap(), context}
-  end
-
-  def to_or(_rest, [h | _], context, _line, _offset) do
-    {h |> String.replace(",", "or") |> String.to_atom() |> List.wrap(), context}
-  end
-
   @doc """
   Logical operators:
   `and` `or`
   """
   def logical_operators do
     empty()
-    |> choice([string("or"), string("and")])
+    |> choice([
+      string("or"),
+      string("and"),
+      string(",") |> replace("or")
+    ])
     |> traverse({__MODULE__, :to_atom, []})
-  end
-
-  def logical_operator_coma do
-    empty()
-    |> string(",")
-    |> traverse({__MODULE__, :to_or, []})
   end
 
   def condition do
@@ -180,24 +172,9 @@ defmodule Liquid.Combinators.General do
   end
 
   def logical_condition do
-    choice([parsec(:logical_operators), parsec(:logical_operator_coma)])
+    parsec(:logical_operators)
     |> choice([parsec(:condition), parsec(:value_definition)])
     |> tag(:logical)
-  end
-
-  # TODO: Check this `or` without `and`
-  def or_contition_value do
-    string("or")
-    |> concat(parsec(:ignore_whitespaces))
-    |> concat(
-      choice([
-        parsec(:number),
-        parsec(:string_value),
-        parsec(:null_value),
-        parsec(:boolean_value)
-      ])
-    )
-    |> parsec(:ignore_whitespaces)
   end
 
   @doc """
@@ -207,14 +184,21 @@ defmodule Liquid.Combinators.General do
     empty()
     |> repeat_until(utf8_char([]), [
       string(@start_variable),
-      string(@end_variable),
-      string(@start_tag),
-      string(@end_tag)
+      string(@start_tag)
     ])
     |> reduce({List, :to_string, []})
   end
 
-  defp allowed_chars_in_variable_definition do
+  @doc """
+  All utf8 valid characters or empty limited by start of tag
+  """
+  def literal_until_tag do
+    empty()
+    |> repeat_until(utf8_char([]), [string(@start_tag)])
+    |> reduce({List, :to_string, []})
+  end
+
+  defp allowed_chars do
     [
       @digit,
       @uppercase_letter,
@@ -228,11 +212,24 @@ defmodule Liquid.Combinators.General do
   Valid variable definition represented by:
   start char [A..Z, a..z, _] plus optional n times [A..Z, a..z, 0..9, _, -]
   """
-  def variable_definition do
+  def variable_definition_for_assignation do
     empty()
     |> concat(ignore_whitespaces())
     |> utf8_char([@uppercase_letter, @lowercase_letter, @underscore])
-    |> optional(times(utf8_char(allowed_chars_in_variable_definition()), min: 1))
+    |> optional(times(utf8_char(allowed_chars()), min: 1))
+    |> concat(ignore_whitespaces())
+    |> reduce({List, :to_string, []})
+  end
+
+  def variable_name_for_assignation do
+    parsec(:variable_definition_for_assignation)
+    |> tag(:variable_name)
+  end
+
+  def variable_definition do
+    empty()
+    |> parsec(:variable_definition_for_assignation)
+    |> optional(utf8_char([@question_mark]))
     |> concat(ignore_whitespaces())
     |> reduce({List, :to_string, []})
   end
@@ -242,15 +239,36 @@ defmodule Liquid.Combinators.General do
   """
   def variable_name do
     parsec(:variable_definition)
-    |> tag(:variable_name)
+    |> unwrap_and_tag(:variable_name)
   end
 
-  def liquid_variable do
+  def quoted_variable_name do
+    parsec(:ignore_whitespaces)
+    |> ignore(utf8_char([@single_quote]))
+    |> parsec(:variable_definition)
+    |> ignore(utf8_char([@single_quote]))
+    |> parsec(:ignore_whitespaces)
+    |> unwrap_and_tag(:variable_name)
+  end
+
+  def not_empty_liquid_variable do
     start_variable()
     |> parsec(:value_definition)
     |> optional(times(parsec(:filters), min: 1))
     |> concat(end_variable())
     |> tag(:liquid_variable)
+  end
+
+  def empty_liquid_variable do
+    start_variable()
+    |> string("")
+    |> concat(end_variable())
+    |> tag(:liquid_variable)
+  end
+
+  def liquid_variable do
+    empty()
+    |> choice([empty_liquid_variable(), not_empty_liquid_variable()])
     |> optional(parsec(:__parse__))
   end
 
@@ -304,16 +322,74 @@ defmodule Liquid.Combinators.General do
     parsec(:ignore_whitespaces)
     |> ignore(string(@start_filter))
     |> parsec(:ignore_whitespaces)
-    |> repeat_until(utf8_char([]), [
-      string(@start_filter),
-      string(@end_variable),
-      string(":"),
-      string(" ")
-    ])
+    |> utf8_string([not: 58, not: 124..125, not: 32], min: 1)
     |> parsec(:ignore_whitespaces)
     |> reduce({List, :to_string, []})
     |> optional(parsec(:filter_param))
     |> tag(:filter)
     |> optional(parsec(:filter))
   end
+
+  @doc """
+  Helper for traverse combinator. Transforms first element in `acc` from string to atom
+  """
+  def to_atom(_rest, [h | t], context, _line, _offset), do: {[String.to_atom(h) | t], context}
+
+  @doc """
+  Parse and ignore an assign symbol
+  """
+  def assignment(symbol) do
+    empty()
+    |> optional(cleaned_comma())
+    |> parsec(:variable_name)
+    |> ignore(utf8_string([symbol], max: 1))
+    |> parsec(:value)
+  end
+
+  def tag_param(name) do
+    empty()
+    |> parsec(:ignore_whitespaces)
+    |> ignore(string(name))
+    |> ignore(ascii_char([@colon]))
+    |> parsec(:ignore_whitespaces)
+    |> choice([parsec(:number), parsec(:variable_definition)])
+    |> parsec(:ignore_whitespaces)
+    |> tag(String.to_atom(name))
+  end
+
+  def conditions(combinator) do
+    combinator
+    |> choice([
+      parsec(:condition),
+      parsec(:value_definition),
+      parsec(:variable_definition)
+    ])
+    |> optional(times(parsec(:logical_condition), min: 1))
+  end
+
+  # defparsec(:conditional, General.conditional())
+  # defparsec(:or_statement, General.or_statement())
+  # defparsec(:and_statement, General.and_statement())
+
+  # def conditional do
+  #   choice([or_statement(), and_statement()])
+  # end
+
+  # def or_statement do
+  #   empty()
+  #   |> choice([parsec(:condition), parsec(:and_statement), parsec(:value)])
+  #   |> ignore(string("or"))
+  #   |> choice([parsec(:condition), parsec(:or_statement), parsec(:and_statement), parsec(:value)])
+  #   |> reduce({List, :to_tuple, []})
+  #   |> unwrap_and_tag(:or)
+  # end
+
+  # def and_statement do
+  #   empty()
+  #   |> choice([parsec(:condition), parsec(:value)])
+  #   |> ignore(string("and"))
+  #   |> choice([parsec(:condition), parsec(:and_statement), parsec(:value)])
+  #   |> reduce({List, :to_tuple, []})
+  #   |> unwrap_and_tag(:and)
+  # end
 end

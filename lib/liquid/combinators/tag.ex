@@ -26,7 +26,7 @@ defmodule Liquid.Combinators.Tag do
   """
   def define_closed(tag_name, combinator_head \\ & &1, combinator_body \\ & &1) do
     tag_name
-    |> open_definition(combinator_head)
+    |> open_tag(combinator_head)
     |> combinator_body.()
     |> close_tag(tag_name)
     |> tag(String.to_atom(tag_name))
@@ -35,19 +35,19 @@ defmodule Liquid.Combinators.Tag do
 
   def define_open(tag_name, combinator_head \\ & &1) do
     tag_name
-    |> open_definition(combinator_head)
+    |> open_tag(combinator_head)
     |> tag(String.to_atom(tag_name))
     |> optional(parsec(:__parse__))
   end
 
   def define_inverse_open(tag_name, combinator_head \\ & &1) do
     tag_name
-    |> open_definition(combinator_head)
+    |> open_tag(combinator_head)
     |> optional(parsec(:__parse__))
     |> tag(String.to_atom(tag_name))
   end
 
-  defp open_definition(tag_name, combinator) do
+  def open_tag(tag_name, combinator \\ & &1) do
     empty()
     |> parsec(:start_tag)
     |> ignore(string(tag_name))
@@ -55,7 +55,7 @@ defmodule Liquid.Combinators.Tag do
     |> parsec(:end_tag)
   end
 
-  defp close_tag(combinator, tag_name) do
+  def close_tag(combinator \\ empty(), tag_name) do
     combinator
     |> parsec(:start_tag)
     |> ignore(string("end" <> tag_name))
