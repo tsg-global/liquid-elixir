@@ -8,14 +8,19 @@ defmodule Liquid.NimbleParser do
   alias Liquid.Combinators.Tags.{
     Assign,
     Capture,
+    Case,
     Decrement,
     For,
+    Generic,
     Increment
   }
 
   defparsec(:liquid_variable, General.liquid_variable())
   defparsec(:variable_definition, General.variable_definition())
   defparsec(:variable_name, General.variable_name())
+  defparsec(:quoted_variable_name, General.quoted_variable_name())
+  defparsec(:variable_definition_for_assignment, General.variable_definition_for_assignment())
+  defparsec(:variable_name_for_assignment, General.variable_name_for_assignment())
   defparsec(:start_tag, General.start_tag())
   defparsec(:end_tag, General.end_tag())
   defparsec(:start_variable, General.start_variable())
@@ -28,17 +33,16 @@ defmodule Liquid.NimbleParser do
   defparsec(:quoted_token, General.quoted_token())
   defparsec(:comparison_operators, General.comparison_operators())
   defparsec(:logical_operators, General.logical_operators())
-  defparsec(:comma_contition_value, General.comma_contition_value())
   defparsec(:ignore_whitespaces, General.ignore_whitespaces())
   defparsec(:condition, General.condition())
   defparsec(:logical_condition, General.logical_condition())
 
+  defparsec(:null_value, LexicalToken.null_value())
   defparsec(:number, LexicalToken.number())
   defparsec(:value_definition, LexicalToken.value_definition())
   defparsec(:value, LexicalToken.value())
   defparsec(:object_property, LexicalToken.object_property())
   defparsec(:boolean_value, LexicalToken.boolean_value())
-  defparsec(:null_value, LexicalToken.null_value())
   defparsec(:string_value, LexicalToken.string_value())
   defparsec(:object_value, LexicalToken.object_value())
   defparsec(:variable_value, LexicalToken.variable_value())
@@ -55,9 +59,7 @@ defmodule Liquid.NimbleParser do
   defparsec(
     :__parse__,
     General.liquid_literal()
-    |> optional(
-      choice([parsec(:liquid_tag), parsec(:liquid_variable)])
-    )
+    |> optional(choice([parsec(:liquid_tag), parsec(:liquid_variable)]))
     |> traverse({:clean_empty_strings, []})
   )
 
@@ -66,11 +68,12 @@ defmodule Liquid.NimbleParser do
   defparsec(:decrement, Decrement.tag())
   defparsec(:increment, Increment.tag())
 
-  defparsecp(:offset_param, For.offset_param())
-  defparsecp(:limit_param, For.limit_param())
   defparsec(:break_tag, For.break_tag())
   defparsec(:continue_tag, For.continue_tag())
   defparsec(:for, For.tag())
+
+  defparsec(:case, Case.tag())
+  defparsec(:clauses, Case.clauses())
 
   defparsec(
     :liquid_tag,
@@ -81,7 +84,8 @@ defmodule Liquid.NimbleParser do
       parsec(:decrement),
       parsec(:break_tag),
       parsec(:continue_tag),
-      parsec(:for)
+      parsec(:for),
+      parsec(:case),
     ])
   )
 
