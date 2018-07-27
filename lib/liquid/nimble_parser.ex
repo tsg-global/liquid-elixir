@@ -10,11 +10,8 @@ defmodule Liquid.NimbleParser do
     Assign,
     Decrement,
     Increment,
-    Include,
-    Raw,
     Cycle,
     For,
-    Tablerow,
     Case,
     Capture,
   }
@@ -77,16 +74,9 @@ defmodule Liquid.NimbleParser do
   defparsec(:cycle_values, Cycle.cycle_values())
   defparsec(:cycle, Cycle.tag())
 
-  defparsecp(:raw_content, Raw.raw_content())
-  defparsec(:raw, Raw.tag())
-
-  defparsec(:include, Include.tag())
-
   defparsec(:break_tag, For.break_tag())
   defparsec(:continue_tag, For.continue_tag())
   defparsec(:for, For.tag())
-
-  defparsec(:tablerow, Tablerow.tag())
 
   defparsec(:case, Case.tag())
   defparsec(:clauses, Case.clauses())
@@ -98,13 +88,10 @@ defmodule Liquid.NimbleParser do
       parsec(:capture),
       parsec(:increment),
       parsec(:decrement),
-      parsec(:include),
       parsec(:cycle),
-      parsec(:raw),
       parsec(:break_tag),
       parsec(:continue_tag),
       parsec(:for),
-      parsec(:tablerow),
       parsec(:case),
     ])
   )

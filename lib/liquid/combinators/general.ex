@@ -3,6 +3,14 @@ defmodule Liquid.Combinators.General do
   General purpose combinators used by almost every other combinator
   """
   import NimbleParsec
+  alias Liquid.Combinators.LexicalToken
+
+  @type comparison_operators :: :== | :!= | :> | :< | :>= | :<= | :contains
+  @type condition :: [
+          condition: {LexicalToken.value(), comparison_operators(), LexicalToken.value()}
+        ]
+  @type liquid_variable :: [liquid_variable: LexicalToken.variable_value(), filters: filter()]
+  @type filter :: [filter: String.t(), params: [values: LexicalToken.value()]]
 
   # Codepoints
   @horizontal_tab 0x0009
