@@ -9,8 +9,8 @@ defmodule Liquid.Combinators.General do
   @type condition :: [
           condition: {LexicalToken.value(), comparison_operators(), LexicalToken.value()}
         ]
-  @type liquid_variable :: [liquid_variable: LexicalToken.variable_value(), filters: filter()]
-  @type filter :: [filter: String.t(), params: [values: LexicalToken.value()]]
+  @type liquid_variable :: [liquid_variable: LexicalToken.variable_value(), filters: [filter()]]
+  @type filter :: [filter: String.t(), params: [value: LexicalToken.value()]]
 
   # Codepoints
   @horizontal_tab 0x0009
