@@ -5,14 +5,15 @@ defmodule Liquid.NimbleParser do
   import NimbleParsec
 
   alias Liquid.Combinators.{General, LexicalToken}
+
   alias Liquid.Combinators.Tags.{
     Assign,
-    Capture,
-    Case,
     Decrement,
+    Increment,
+    Cycle,
     For,
-    Generic,
-    Increment
+    Case,
+    Capture,
   }
 
   defparsec(:liquid_variable, General.liquid_variable())
@@ -68,6 +69,9 @@ defmodule Liquid.NimbleParser do
   defparsec(:decrement, Decrement.tag())
   defparsec(:increment, Increment.tag())
 
+  defparsec(:cycle_values, Cycle.cycle_values())
+  defparsec(:cycle, Cycle.tag())
+
   defparsec(:break_tag, For.break_tag())
   defparsec(:continue_tag, For.continue_tag())
   defparsec(:for, For.tag())
@@ -82,6 +86,7 @@ defmodule Liquid.NimbleParser do
       parsec(:capture),
       parsec(:increment),
       parsec(:decrement),
+      parsec(:cycle),
       parsec(:break_tag),
       parsec(:continue_tag),
       parsec(:for),
