@@ -69,8 +69,6 @@ defmodule Liquid.NimbleParser do
   defparsec(:decrement, Decrement.tag())
   defparsec(:increment, Increment.tag())
 
-  defparsec(:cycle_group, Cycle.cycle_group())
-  defparsec(:cycle_body, Cycle.cycle_body())
   defparsec(:cycle_values, Cycle.cycle_values())
   defparsec(:cycle, Cycle.tag())
 
