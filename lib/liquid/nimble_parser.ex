@@ -17,6 +17,19 @@ defmodule Liquid.NimbleParser do
     Capture,
   }
 
+  @type t :: [
+          Assign.t()
+          | Capture.t()
+          | Increment.t()
+          | Decrement.t()
+          | Include.t()
+          | Cycle.t()
+          | For.t()
+          | Case.t()
+          | General.liquid_variable()
+          | String.t()
+        ]
+
   defparsec(:liquid_variable, General.liquid_variable())
   defparsec(:variable_definition, General.variable_definition())
   defparsec(:variable_name, General.variable_name())
