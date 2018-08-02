@@ -10,6 +10,7 @@ defmodule Liquid.NimbleParser do
     Assign,
     Decrement,
     Increment,
+    Include,
     Cycle,
     For,
     Case,
@@ -72,6 +73,8 @@ defmodule Liquid.NimbleParser do
   defparsec(:cycle_values, Cycle.cycle_values())
   defparsec(:cycle, Cycle.tag())
 
+  defparsec(:include, Include.tag())
+
   defparsec(:break_tag, For.break_tag())
   defparsec(:continue_tag, For.continue_tag())
   defparsec(:for, For.tag())
@@ -86,6 +89,7 @@ defmodule Liquid.NimbleParser do
       parsec(:capture),
       parsec(:increment),
       parsec(:decrement),
+      parsec(:include),
       parsec(:cycle),
       parsec(:break_tag),
       parsec(:continue_tag),
