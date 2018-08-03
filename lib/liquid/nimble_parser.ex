@@ -12,6 +12,7 @@ defmodule Liquid.NimbleParser do
     Increment,
     Include,
     Cycle,
+    If,
     For,
     Case,
     Capture,
@@ -25,6 +26,8 @@ defmodule Liquid.NimbleParser do
           | Include.t()
           | Cycle.t()
           | For.t()
+          | If.t()
+          | Unless.t()
           | Case.t()
           | General.liquid_variable()
           | String.t()
@@ -88,6 +91,11 @@ defmodule Liquid.NimbleParser do
 
   defparsec(:include, Include.tag())
 
+  defparsec(:body_elsif, If.body_elsif())
+  defparsec(:if, If.tag())
+  defparsec(:elsif_tag, If.elsif_tag())
+  defparsec(:unless, If.unless_tag())
+
   defparsec(:break_tag, For.break_tag())
   defparsec(:continue_tag, For.continue_tag())
   defparsec(:for, For.tag())
@@ -107,6 +115,8 @@ defmodule Liquid.NimbleParser do
       parsec(:break_tag),
       parsec(:continue_tag),
       parsec(:for),
+      parsec(:if),
+      parsec(:unless),
       parsec(:case),
     ])
   )
