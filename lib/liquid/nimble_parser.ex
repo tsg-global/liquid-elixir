@@ -14,6 +14,7 @@ defmodule Liquid.NimbleParser do
     Cycle,
     If,
     For,
+    Tablerow,
     Case,
     Capture,
   }
@@ -28,6 +29,7 @@ defmodule Liquid.NimbleParser do
           | For.t()
           | If.t()
           | Unless.t()
+          | Tablerow.t()
           | Case.t()
           | General.liquid_variable()
           | String.t()
@@ -100,6 +102,8 @@ defmodule Liquid.NimbleParser do
   defparsec(:continue_tag, For.continue_tag())
   defparsec(:for, For.tag())
 
+  defparsec(:tablerow, Tablerow.tag())
+
   defparsec(:case, Case.tag())
   defparsec(:clauses, Case.clauses())
 
@@ -117,6 +121,7 @@ defmodule Liquid.NimbleParser do
       parsec(:for),
       parsec(:if),
       parsec(:unless),
+      parsec(:tablerow),
       parsec(:case),
     ])
   )
