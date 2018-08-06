@@ -11,6 +11,7 @@ defmodule Liquid.NimbleParser do
     Decrement,
     Increment,
     Include,
+    Raw,
     Cycle,
     If,
     For,
@@ -26,6 +27,7 @@ defmodule Liquid.NimbleParser do
           | Decrement.t()
           | Include.t()
           | Cycle.t()
+          | Raw.t()
           | For.t()
           | If.t()
           | Unless.t()
@@ -90,6 +92,9 @@ defmodule Liquid.NimbleParser do
 
   defparsec(:cycle_values, Cycle.cycle_values())
   defparsec(:cycle, Cycle.tag())
+
+  defparsecp(:raw_content, Raw.raw_content())
+  defparsec(:raw, Raw.tag())
 
   defparsec(:include, Include.tag())
 
