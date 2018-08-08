@@ -8,6 +8,7 @@ defmodule Liquid.NimbleParser do
 
   alias Liquid.Combinators.Tags.{
     Assign,
+    Comment,
     Decrement,
     Increment,
     Include,
@@ -28,6 +29,7 @@ defmodule Liquid.NimbleParser do
           | Include.t()
           | Cycle.t()
           | Raw.t()
+          | Comment.t()
           | For.t()
           | If.t()
           | Unless.t()
@@ -90,6 +92,9 @@ defmodule Liquid.NimbleParser do
   defparsec(:decrement, Decrement.tag())
   defparsec(:increment, Increment.tag())
 
+  defparsecp(:comment_content, Comment.comment_content())
+  defparsec(:comment, Comment.tag())
+
   defparsec(:cycle_values, Cycle.cycle_values())
   defparsec(:cycle, Cycle.tag())
 
@@ -121,9 +126,11 @@ defmodule Liquid.NimbleParser do
       parsec(:decrement),
       parsec(:include),
       parsec(:cycle),
+      parsec(:raw),
+      parsec(:comment),
+      parsec(:for),
       parsec(:break_tag),
       parsec(:continue_tag),
-      parsec(:for),
       parsec(:if),
       parsec(:unless),
       parsec(:tablerow),
