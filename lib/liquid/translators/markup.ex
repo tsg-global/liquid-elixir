@@ -1,4 +1,4 @@
-defmodule Liquid.Combinators.Markup do
+defmodule Liquid.Translators.Markup do
   @moduledoc """
   Transform AST to String
   """
