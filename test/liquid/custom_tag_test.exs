@@ -22,6 +22,8 @@ defmodule Liquid.CustomTagTest do
     :ok
   end
 
+  # TODO: Custom Tag
+  @tag :skip
   test "custom tag from example(almost random now :)" do
     assert_template_result("123", "123{% assign qwe = 5 %}")
     assert_template_result("4", "{% minus_one 5 %}")
