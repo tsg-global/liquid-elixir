@@ -29,7 +29,7 @@ defmodule Liquid.Combinators.Tags.Raw do
   def tag do
     @name
     |> Tag.open_tag()
-    |> parsec(:raw_content)
+    |> concat(raw_content())
     |> tag(:raw)
     |> optional(parsec(:__parse__))
   end
