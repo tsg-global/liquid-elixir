@@ -6,7 +6,7 @@ defmodule Liquid.Translators.Tags.Include do
 
   def translate([snippet, rest]), do: parse("'#{Markup.literal(snippet)}' #{Markup.literal(rest)}")
 
-  defp parse(markup) do
+  def parse(markup) do
     Include.parse(%Tag{markup: markup, name: :include})
   end
 end

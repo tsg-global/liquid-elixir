@@ -19,6 +19,7 @@ defmodule Liquid.NimbleParser do
     Tablerow,
     Case,
     Capture,
+    Ifchanged,
   }
 
   @type t :: [
@@ -35,6 +36,7 @@ defmodule Liquid.NimbleParser do
           | Unless.t()
           | Tablerow.t()
           | Case.t()
+          | Ifchanged.t()
           | General.liquid_variable()
           | String.t()
         ]
@@ -101,6 +103,8 @@ defmodule Liquid.NimbleParser do
   defparsecp(:raw_content, Raw.raw_content())
   defparsec(:raw, Raw.tag())
 
+  defparsec(:ifchanged, Ifchanged.tag())
+
   defparsec(:include, Include.tag())
 
   defparsec(:body_elsif, If.body_elsif())
@@ -135,6 +139,7 @@ defmodule Liquid.NimbleParser do
       parsec(:unless),
       parsec(:tablerow),
       parsec(:case),
+      parsec(:ifchanged)
     ])
   )
 
