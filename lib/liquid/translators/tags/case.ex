@@ -1,6 +1,15 @@
 defmodule Liquid.Translators.Tags.Case do
-  alias Liquid.Translators.Markup
+  @moduledoc """
+  Translate new AST to old AST for the Case tag
+  """
+  alias Liquid.Translators.{General, Markup}
+  alias Liquid.Combinators.Tags.Case
+  alias Liquid.Block
 
+  @doc """
+  Takes the markup of the new AST, creates a `Liquid.Block` struct (old AST) and fill the keys needed to render a Case tag
+  """
+  @spec translate(Case.markup()) :: Block.t()
   def translate([nil]) do
     block = %Liquid.Block{name: :case, markup: "null"}
     to_case_block(block)
