@@ -4,7 +4,7 @@ defmodule Liquid.Translators.Tags.Case do
   """
   alias Liquid.Translators.Markup
   alias Liquid.Combinators.Tags.Case
-  alias Liquid.Block
+  alias Liquid.{NimbleTranslator, Block}
 
   @doc """
   Takes the markup of the new AST, creates a `Liquid.Block` struct (old AST) and fill the keys needed to render a Case tag
@@ -84,7 +84,7 @@ defmodule Liquid.Translators.Tags.Case do
       markup: "\"#{Markup.literal(head)}\"" <> Markup.literal(tail)
     }
 
-    result = Liquid.NimbleTranslator.process_node(values)
+    result = NimbleTranslator.process_node(values)
     [tag, result]
   end
 
@@ -94,24 +94,18 @@ defmodule Liquid.Translators.Tags.Case do
       markup: Enum.join(conditions)
     }
 
-    result = Liquid.NimbleTranslator.process_node(values)
+    result = NimbleTranslator.process_node(values)
     [tag, result]
   end
 
   defp else_tag(values) do
-    process_list = Liquid.NimbleTranslator.process_node(values)
+    process_list = NimbleTranslator.process_node(values)
+
+    else_liquid_tag = %Liquid.Tag{name: :else}
 
     if is_list(process_list) do
-      else_liquid_tag = %Liquid.Tag{
-        name: :else
-      }
-
       [else_liquid_tag | process_list]
     else
-      else_liquid_tag = %Liquid.Tag{
-        name: :else
-      }
-
       [else_liquid_tag, process_list]
     end
   end
