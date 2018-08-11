@@ -2,7 +2,7 @@ defmodule Liquid.Translators.Tags.Case do
   @moduledoc """
   Translate new AST to old AST for the Case tag
   """
-  alias Liquid.Translators.{General, Markup}
+  alias Liquid.Translators.Markup
   alias Liquid.Combinators.Tags.Case
   alias Liquid.Block
 

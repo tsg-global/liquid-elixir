@@ -11,7 +11,7 @@ defmodule Liquid.Translators.Tags.Comment do
   """
 
   @spec translate(Comment.markup()) :: Block.t()
-  def translate(markup) do
+  def translate(_markup) do
     %Liquid.Block{name: :comment, blank: true, strict: false, nodelist: [""]}
   end
 end
