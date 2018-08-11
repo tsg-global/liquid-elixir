@@ -38,9 +38,7 @@ defmodule Liquid.Translators.General do
   def is_else({:elsif, _}), do: true
   def is_else(_), do: false
 
-  def not_open_if({:evaluation, _}), do: false
-  def not_open_if({:else, _}), do: false
-  def not_open_if({:elsif, _}), do: false
+  def not_open_if({key, _}), do: !Enum.member?([:evaluation, :else, :elsif], key)
   def not_open_if(_), do: true
 
   def types_no_list([]), do: []
