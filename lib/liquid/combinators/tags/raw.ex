@@ -4,10 +4,10 @@ defmodule Liquid.Combinators.Tags.Raw do
   which uses conflicting syntax.
   Input:
   ```
-  {% raw %}
-  In Handlebars, {{ this }} will be HTML-escaped, but
-  {{{ that }}} will not.
-  {% endraw %}
+    {% raw %}
+    In Handlebars, {{ this }} will be HTML-escaped, but
+    {{{ that }}} will not.
+    {% endraw %}
   ```
   Output:
   ```
