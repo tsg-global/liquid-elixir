@@ -1,5 +1,6 @@
 defmodule Liquid.Translators.General do
   @moduledoc false
+  alias Liquid.Translators.Markup
 
   @doc """
   Returns a corresponding type value:
@@ -13,28 +14,15 @@ defmodule Liquid.Translators.General do
 
   Complex Value Type: {:range, [start: "any_simple_type", end: "any_simple_type"]} -> "(any_simple_type..any_simple_type)"
   """
-
   @spec variable_in_parts(Liquid.Combinators.LexicalToken.variable_value()) :: String.t()
   def variable_in_parts(variable) do
     Enum.map(variable, fn {key, value} ->
       case key do
-        :part -> string_have_question("#{value}")
-        :index -> "[#{value}]"
-        _ -> "[#{value}]"
+        :part -> value |>  Markup.literal() |> String.replace("?", "")
+        :index -> "[#{Markup.literal(value)}]"
+        _ -> "[#{Markup.literal(value)}]"
       end
     end)
-  end
-
-  @doc """
-  Remove the `?` symbol from the variable name string
-  """
-  @spec string_have_question(String.t()) :: String.t()
-  def string_have_question(value) when is_bitstring(value) do
-    if String.contains?(value, "?") do
-      String.replace(value, "?", "")
-    else
-      "#{value}"
-    end
   end
 
   @doc """
