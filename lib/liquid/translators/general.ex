@@ -40,10 +40,10 @@ defmodule Liquid.Translators.General do
   @doc """
   Returns true when a tuple is an Else/Elseif tag
   """
-  @spec is_else(tuple()) :: boolean()
-  def is_else({:else, _}), do: true
-  def is_else({:elsif, _}), do: true
-  def is_else(_), do: false
+  @spec else?(tuple()) :: boolean()
+  def else?({:else, _}), do: true
+  def else?({:elsif, _}), do: true
+  def else?(_), do: false
 
   @doc """
   Returns true when a tuple is and If tag
