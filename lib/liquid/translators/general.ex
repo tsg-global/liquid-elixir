@@ -11,9 +11,7 @@ defmodule Liquid.Translators.General do
    "string_value" -> "'string_value'"
     2 -> "2"
 
-  Complex Value Type:
-  {:range, [start: "any_simple_type", end: "any_simple_type"]} -> "(any_simple_type..any_simple_type)"
-
+  Complex Value Type: {:range, [start: "any_simple_type", end: "any_simple_type"]} -> "(any_simple_type..any_simple_type)"
   """
 
   @spec variable_in_parts(Liquid.Combinators.LexicalToken.variable_value()) :: String.t()
