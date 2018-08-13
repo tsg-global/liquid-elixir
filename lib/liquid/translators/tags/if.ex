@@ -4,7 +4,7 @@ defmodule Liquid.Translators.Tags.If do
   """
   alias Liquid.Translators.{General, Markup}
   alias Liquid.Combinators.Tags.If
-  alias Liquid.Block
+  alias Liquid.{Block, IsElse, NimbleTranslator}
 
   @doc """
   Takes the markup of the new AST, creates a `Liquid.Block` struct (old AST) and fill the keys needed to render a If tag
@@ -28,12 +28,11 @@ defmodule Liquid.Translators.Tags.If do
     block = %Liquid.Block{
       name: :if,
       markup: markup,
-      nodelist: General.types_only_list(Liquid.NimbleTranslator.process_node(nodelist)),
+      nodelist: General.types_only_list(NimbleTranslator.process_node(nodelist)),
       blank: Blank.blank?(nodelist) and Blank.blank?(else_list),
-      elselist:
-        General.types_only_list(Liquid.NimbleTranslator.process_node(else_list) |> List.flatten())
+      elselist: else_list |> NimbleTranslator.process_node() |> List.flatten() |> General.types_only_list()
     }
 
-    Liquid.IfElse.parse_conditions(block)
+    IfElse.parse_conditions(block)
   end
 end
