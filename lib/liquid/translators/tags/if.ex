@@ -4,7 +4,7 @@ defmodule Liquid.Translators.Tags.If do
   """
   alias Liquid.Translators.{General, Markup}
   alias Liquid.Combinators.Tags.If
-  alias Liquid.{Block, IsElse, NimbleTranslator}
+  alias Liquid.{Block, IfElse, NimbleTranslator}
 
   @doc """
   Takes the markup of the new AST, creates a `Liquid.Block` struct (old AST) and fill the keys needed to render a If tag
