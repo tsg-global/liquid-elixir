@@ -87,7 +87,7 @@ defmodule Liquid.NimbleTranslator do
     check_blank(translated)
   end
 
-  def check_blank(%Liquid.Block{name: :if, nodelist: nodelist, elselist: elselist} = translated)
+  defp check_blank(%Liquid.Block{name: :if, nodelist: nodelist, elselist: elselist} = translated)
       when is_list(nodelist) and is_list(elselist) do
     if Blank.blank?(nodelist) and Blank.blank?(elselist) do
       %{translated | blank: true}
@@ -96,7 +96,7 @@ defmodule Liquid.NimbleTranslator do
     end
   end
 
-  def check_blank(%Liquid.Block{nodelist: nodelist} = translated)
+  defp check_blank(%Liquid.Block{nodelist: nodelist} = translated)
       when is_list(nodelist) do
     if Blank.blank?(nodelist) do
       %{translated | blank: true}
@@ -105,5 +105,5 @@ defmodule Liquid.NimbleTranslator do
     end
   end
 
-  def check_blank(translated), do: translated
+  defp check_blank(translated), do: translated
 end
