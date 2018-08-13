@@ -29,15 +29,14 @@ defmodule Liquid.Translators.General do
   Returns true when a tuple is an Else/Elseif tag
   """
   @spec else?(tuple()) :: boolean()
-  def else?({:else, _}), do: true
-  def else?({:elsif, _}), do: true
+  def else?({key, _}) when key in [:else, :elsif], do: true
   def else?(_), do: false
 
   @doc """
   Returns true when a tag is an conditional statement (evaluation, else, elsif)
   """
   @spec conditional_statement?(tuple()) :: boolean()
-  def conditional_statement?({key, _}), do: Enum.member?([:evaluation, :else, :elsif], key)
+  def conditional_statement?({key, _}) when key in [:evaluation, :else, :elsif], do: true
   def conditional_statement?(_), do: false
 
   @doc """
