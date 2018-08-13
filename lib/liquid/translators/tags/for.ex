@@ -34,7 +34,7 @@ defmodule Liquid.Translators.Tags.For do
     markup = "#{variable_markup} in #{Markup.literal(value)} #{for_params_markup}"
 
     %Liquid.Block{
-      elselist: General.types_no_list(NimbleTranslator.process_node(else_body)),
+      elselist: unwrap(NimbleTranslator.process_node(else_body)),
       iterator: process_iterator(%Block{markup: markup}),
       markup: markup,
       name: :for,
@@ -45,4 +45,8 @@ defmodule Liquid.Translators.Tags.For do
   defp process_iterator(%Block{markup: markup}) do
     Liquid.ForElse.parse_iterator(%Block{markup: markup})
   end
+
+  defp unwrap([]), do: []
+  defp unwrap([first | _]), do: first
+  defp unwrap(element), do: element
 end

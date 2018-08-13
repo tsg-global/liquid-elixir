@@ -39,16 +39,6 @@ defmodule Liquid.Translators.General do
   def conditional_statement?({key, _}) when key in [:evaluation, :else, :elsif], do: true
   def conditional_statement?(_), do: false
 
-  @doc """
-  When element is a list, returns the first value in, else returns element
-  """
-  @spec types_no_list(List.t()) :: String.t() | Number.t()
-  def types_no_list([]), do: []
-
-  def types_no_list(element) do
-    if is_list(element), do: hd(element), else: element
-  end
-
   def types_only_list(element) do
     if is_list(element), do: element, else: [element]
   end
