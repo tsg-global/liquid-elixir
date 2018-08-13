@@ -34,13 +34,11 @@ defmodule Liquid.Translators.General do
   def else?(_), do: false
 
   @doc """
-  Returns true when a tuple is and If tag
+  Returns true when a tag is an conditional statement (evaluation, else, elsif)
   """
-  @spec not_open_if(tuple()) :: boolean()
-  def not_open_if({:evaluation, _}), do: false
-  def not_open_if({:else, _}), do: false
-  def not_open_if({:elsif, _}), do: false
-  def not_open_if(_), do: true
+  @spec conditional_statement?(tuple()) :: boolean()
+  def conditional_statement?({key, _}), do: Enum.member?([:evaluation, :else, :elsif], key)
+  def conditional_statement?(_), do: false
 
   @doc """
   When element is a list, returns the first value in, else returns element
