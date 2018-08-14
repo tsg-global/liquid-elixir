@@ -1,6 +1,4 @@
 defmodule Liquid.Translators.Tags.Tablerow do
-  @moduledoc false
-
   @moduledoc """
   Translate new AST to old AST for the Tablerow tag
   """
