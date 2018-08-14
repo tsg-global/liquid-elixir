@@ -4,7 +4,7 @@ defmodule Liquid.Translators.Tags.Case do
   """
   alias Liquid.Translators.Markup
   alias Liquid.Combinators.Tags.Case
-  alias Liquid.{NimbleTranslator, Block}
+  alias Liquid.{NimbleTranslator, Block, Variable, Case}
 
   @doc """
   Takes the markup of the new AST, creates a `Liquid.Block` struct (old AST) and fill the keys needed to render a Case tag
@@ -26,20 +26,20 @@ defmodule Liquid.Translators.Tags.Case do
     create_block_for_case_else("null", else_tag_values)
   end
 
-  def translate([nil, badbody, {:clauses, clauses}]) do
-    create_block_for_case("null", badbody, clauses)
+  def translate([nil, literal, {:clauses, clauses}]) do
+    create_block_for_case("null", literal, clauses)
   end
 
-  def translate([nil, badbody, {:clauses, clauses}, {:else, else_tag_values}]) do
-    create_block_for_case("null", badbody, clauses, else_tag_values)
+  def translate([nil, literal, {:clauses, clauses}, {:else, else_tag_values}]) do
+    create_block_for_case("null", literal, clauses, else_tag_values)
   end
 
-  def translate([nil, badbody, {:else, else_tag_values}]) do
-    create_block_for_case_else("null", badbody, else_tag_values)
+  def translate([nil, literal, {:else, else_tag_values}]) do
+    create_block_for_case_else("null", literal, else_tag_values)
   end
 
-  def translate([nil, badbody]) do
-    to_case_block("null", [badbody])
+  def translate([nil, literal]) do
+    to_case_block("null", [literal])
   end
 
   def translate([value]) do
@@ -59,21 +59,21 @@ defmodule Liquid.Translators.Tags.Case do
     create_block_for_case_else(Markup.literal(value), else_tag_values)
   end
 
-  def translate([value, badbody, {:clauses, clauses}]) do
-    create_block_for_case(Markup.literal(value), badbody, clauses)
+  def translate([value, literal, {:clauses, clauses}]) do
+    create_block_for_case(Markup.literal(value), literal, clauses)
   end
 
-  def translate([value, badbody, {:clauses, clauses}, {:else, else_tag_values}]) do
-    create_block_for_case(Markup.literal(value), badbody, clauses, else_tag_values)
+  def translate([value, literal, {:clauses, clauses}, {:else, else_tag_values}]) do
+    create_block_for_case(Markup.literal(value), literal, clauses, else_tag_values)
   end
 
-  def translate([value, badbody, {:else, else_tag_values}]) do
-    create_block_for_case_else(Markup.literal(value), badbody, else_tag_values)
+  def translate([value, literal, {:else, else_tag_values}]) do
+    create_block_for_case_else(Markup.literal(value), literal, else_tag_values)
   end
 
-  def translate([value, badbody]) do
+  def translate([value, literal]) do
     markup = Markup.literal(value)
-    nodelist = [badbody]
+    nodelist = [literal]
     to_case_block(markup, nodelist)
   end
 
@@ -121,16 +121,16 @@ defmodule Liquid.Translators.Tags.Case do
     to_case_block(markup, nodelist_plus_else)
   end
 
-  defp create_block_for_case(markup, badbody, when_tag) do
+  defp create_block_for_case(markup, literal, when_tag) do
     nodelist_when = Enum.flat_map(when_tag, &when_to_nodelist/1)
-    full_list =  List.flatten([badbody | nodelist_when])
+    full_list =  List.flatten([literal | nodelist_when])
     to_case_block(markup, full_list)
   end
 
-  defp create_block_for_case(markup, badbody, when_tag, else_tag_values) do
+  defp create_block_for_case(markup, literal, when_tag, else_tag_values) do
     nodelist_when = Enum.flat_map(when_tag, &when_to_nodelist/1)
     nodelist_plus_else = [nodelist_when | else_tag(else_tag_values)]
-    full_list =  List.flatten([badbody | nodelist_plus_else])
+    full_list =  List.flatten([literal | nodelist_plus_else])
     to_case_block(markup, full_list)
   end
 
@@ -139,14 +139,14 @@ defmodule Liquid.Translators.Tags.Case do
     to_case_block(markup, nodelist)
   end
 
-  defp create_block_for_case_else(markup, badbody, else_tag_values) do
+  defp create_block_for_case_else(markup, literal, else_tag_values) do
     nodelist_plus_else = else_tag(else_tag_values)
-    full_list =  List.flatten([badbody | nodelist_plus_else])
+    full_list =  List.flatten([literal | nodelist_plus_else])
     to_case_block(markup, full_list)
   end
 
   defp to_case_block(markup, nodelist) do
-    [[_, name]] = Regex.scan(Liquid.Case.syntax(), markup)
-    Liquid.Case.split(Liquid.Variable.create(name), nodelist)
+    [[_, name]] = Regex.scan(Case.syntax(), markup)
+    Case.split(Variable.create(name), nodelist)
   end
 end
