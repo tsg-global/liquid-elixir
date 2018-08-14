@@ -11,7 +11,6 @@ defmodule Liquid.Translators.Tags.For do
   @doc """
   Takes the markup of the new AST, creates a `Liquid.Block` struct (old AST) and fill the keys needed to render a For tag
   """
-
   @spec translate(For.markup()) :: Block.t()
   def translate(
         statements: [variable: variable, value: value, params: params],
