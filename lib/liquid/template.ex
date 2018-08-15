@@ -63,14 +63,14 @@ defmodule Liquid.Template do
   def parse(<<markup::binary>>, presets) do
     result = Liquid.NimbleParser.parse(markup)
 
-    t =
+    template =
       case result do
         {:ok, _value} -> Liquid.NimbleTranslator.translate(result)
         {:error, value} -> raise value
         _ -> ""
       end
 
-    %{t | presets: presets}
+    %{template | presets: presets}
   end
 
   @spec parse(nil, map) :: Liquid.Template
