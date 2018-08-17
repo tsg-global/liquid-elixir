@@ -38,8 +38,14 @@ defmodule Liquid.Combinators.Tags.Case do
           ]
         ]
 
+  @doc """
+  Parse a `Liquid` Case tag.
+  """
   def tag, do: Tag.define_closed("case", &General.conditions/1, &body/1)
 
+  @doc """
+  Parse When tag clauses.
+  """
   def clauses do
     empty()
     |> times(when_tag(), min: 1)
