@@ -4,7 +4,7 @@ defmodule Liquid.Translators.Markup do
   """
 
   @doc """
-  Takes the New (NimbleParser) AST and creates a String and use it as a markup for the old AST
+  Takes the New (NimbleParser) AST and creates a String and use it as a markup for the old AST.
   """
   @spec literal(list() | tuple()) :: String.t()
   def literal(elem, join_with) when is_list(elem) do
@@ -24,6 +24,8 @@ defmodule Liquid.Translators.Markup do
   def literal({:filters, value}), do: " | " <> literal(value, " | ")
   def literal({:params, value}), do: ": " <> literal(value, ", ")
   def literal({:assignment, [name | value]}), do: "#{name}: #{literal(value)}"
+
+  def literal({:logical, [operator, value]}), do: " #{operator} #{literal(value)}"
 
   def literal({:condition, {left, op, right}}),
     do: "#{normalize_value(left)} #{op} #{normalize_value(right)}"
