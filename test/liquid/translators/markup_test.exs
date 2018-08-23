@@ -29,4 +29,8 @@ defmodule Liquid.Translators.MarkupTest do
     assert Markup.literal({:variable, [parts: [part: "var", index: "a:b c", index: "paged"]]}) ==
              "var[\"a:b c\"][\"paged\"]"
   end
+
+  test "transforms {:logical} tag" do
+    assert Markup.literal({:logical, [:or, {:variable, [parts: [part: "b"]]}]}) == " or b"
+  end
 end
