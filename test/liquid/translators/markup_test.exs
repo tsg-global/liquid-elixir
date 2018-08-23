@@ -33,4 +33,8 @@ defmodule Liquid.Translators.MarkupTest do
   test "transforms {:logical} tag" do
     assert Markup.literal({:logical, [:or, {:variable, [parts: [part: "b"]]}]}) == " or b"
   end
+
+  test "transforms {:condition} tag" do
+    assert Markup.literal({:condition, {true, :==, nil}}) == "true == null"
+  end
 end
