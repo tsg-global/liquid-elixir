@@ -19,7 +19,7 @@ defmodule Liquid.NimbleParser do
     Tablerow,
     Case,
     Capture,
-    Ifchanged,
+    Ifchanged
   }
 
   @type t :: [
