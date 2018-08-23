@@ -68,4 +68,8 @@ defmodule Liquid.Translators.MarkupTest do
     assert Markup.literal({:range, [start: 1, end: 10]}) == "(1..10)"
     assert Markup.literal({:range, [start: -10, end: 1]}) == "(-10..1)"
   end
+
+  test "transforms {:reverse} tag" do
+    assert Markup.literal({:reversed, []}) == " reversed"
+  end
 end
