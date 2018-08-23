@@ -63,4 +63,9 @@ defmodule Liquid.Translators.MarkupTest do
              ]
            }) == ": my_variable: \"apples\", my_other_variable: \"oranges\""
   end
+
+  test "transforms {:range} tag" do
+    assert Markup.literal({:range, [start: 1, end: 10]}) == "(1..10)"
+    assert Markup.literal({:range, [start: -10, end: 1]}) == "(-10..1)"
+  end
 end
