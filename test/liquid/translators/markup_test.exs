@@ -48,4 +48,19 @@ defmodule Liquid.Translators.MarkupTest do
   test "transforms {:variable_name} tag" do
     assert Markup.literal({:variable_name, "cart"}) == "cart"
   end
+
+  test "transforms {:filters} tag" do
+    assert Markup.literal({:filters, [filter: ["date", {:params, [value: "%w"]}]]}) ==
+             " | date: \"%w\""
+  end
+
+  test "transforms {:assignment} tag" do
+    assert Markup.literal({
+             :params,
+             [
+               assignment: [variable_name: "my_variable", value: "apples"],
+               assignment: [variable_name: "my_other_variable", value: "oranges"]
+             ]
+           }) == ": my_variable: \"apples\", my_other_variable: \"oranges\""
+  end
 end
