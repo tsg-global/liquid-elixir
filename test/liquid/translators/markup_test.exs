@@ -17,4 +17,16 @@ defmodule Liquid.Translators.MarkupTest do
               ]}
            ) == "company.name.employee[store.state[1]]"
   end
+
+  test "transforms {:variable} tag" do
+    assert Markup.literal({:variable, [parts: [part: "store", part: "state", index: 1]]}) ==
+             "store.state[1]"
+
+    assert Markup.literal(
+             {:variable, [parts: [part: "store", part: "state", index: 0, index: 0, index: 1]]}
+           ) == "store.state[0][0][1]"
+
+    assert Markup.literal({:variable, [parts: [part: "var", index: "a:b c", index: "paged"]]}) ==
+             "var[\"a:b c\"][\"paged\"]"
+  end
 end
