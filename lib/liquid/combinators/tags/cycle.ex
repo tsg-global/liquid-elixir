@@ -35,7 +35,8 @@ defmodule Liquid.Combinators.Tags.Cycle do
   import NimbleParsec
   alias Liquid.Combinators.{Tag, General}
 
-  @type t :: [cycle: [group: String.t(), values: [LexicalToken.value()]]]
+  @type t :: [cycle: Cycle.markup()]
+  @type markup :: [group: String.t(), values: [LexicalToken.value()]]
 
   defp group do
     parsec(:ignore_whitespaces)
@@ -55,6 +56,11 @@ defmodule Liquid.Combinators.Tags.Cycle do
     |> tag(:values)
   end
 
+  @doc """
+  Groups the values of the cycle and creates a regular list containing the results
+  of the `Liquid.Combinators.LexicalToken.value_definition()` combinator.
+  """
+  @spec cycle_values() :: NimbleParsec.t()
   def cycle_values do
     empty()
     |> times(parsec(:value_definition), min: 1)
@@ -62,6 +68,12 @@ defmodule Liquid.Combinators.Tags.Cycle do
     |> optional(parsec(:cycle_values))
   end
 
+  @doc """
+  Parses a `Liquid` Cycle tag, creates a Keyword list where the key is the name of the tag
+  (cycle in this case) and the value is another keyword list which represent the internal
+  structure of the tag.
+  """
+  @spec tag() :: NimbleParsec.t()
   def tag do
     Tag.define_open("cycle", fn combinator ->
       combinator

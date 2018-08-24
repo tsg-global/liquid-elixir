@@ -1,7 +1,7 @@
 defmodule Liquid.Combinators.Tags.If do
   @moduledoc """
   Executes a block of code only if a certain condition is true.
-  If this condition is false executes `else` block of code
+  If this condition is false executes `else` block of code.
   Input:
   ```
     {% if product.title == 'Awesome Shoes' %}
@@ -24,12 +24,18 @@ defmodule Liquid.Combinators.Tags.If do
   @type unless_tag :: [unless: conditional_body()]
   @type conditional_body :: [
           conditions: General.conditions(),
-          body: [Liquid.NimbleParser.t() |
-                 [elsif: conditional_body()] |
-                 [else: Liquid.NimbleParser.t()]
-                ]
+          body: [
+            Liquid.NimbleParser.t()
+            | [elsif: conditional_body()]
+            | [else: Liquid.NimbleParser.t()]
+          ]
         ]
 
+  @doc """
+  Parses a `Liquid` Elsif tag, creates a Keyword list where the key is the name of the tag
+  (elsif in this case) and the value is the result of the `body_elsif()` combinator.
+  """
+  @spec elsif_tag() :: NimbleParsec.t()
   def elsif_tag do
     "elsif"
     |> Tag.open_tag(&predicate/1)
@@ -38,8 +44,20 @@ defmodule Liquid.Combinators.Tags.If do
     |> optional(parsec(:__parse__))
   end
 
+  @doc """
+  Parses a `Liquid` Unless tag, creates a Keyword list where the key is the name of the tag
+  (unless in this case) and the value is another keyword list, that represent the internal
+  structure of the tag.
+  """
+  @spec unless_tag() :: NimbleParsec.t()
   def unless_tag, do: do_tag("unless")
 
+  @doc """
+  Parses a `Liquid` If tag, creates a Keyword list where the key is the name of the tag
+  (if in this case) and the value is another keyword list which represent the internal
+  structure of the tag.
+  """
+  @spec tag() :: NimbleParsec.t()
   def tag, do: do_tag("if")
 
   defp body do
@@ -50,6 +68,10 @@ defmodule Liquid.Combinators.Tags.If do
     |> tag(:body)
   end
 
+  @doc """
+  Parses a Elsif body, creates a Keyword list with key `body:` and the value is another keyword list, that behaves like a if body.
+  """
+  @spec body_elsif() :: NimbleParsec.t()
   def body_elsif do
     empty()
     |> choice([

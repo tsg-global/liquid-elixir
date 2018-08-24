@@ -13,13 +13,19 @@ defmodule Liquid.Combinators.Tags.Capture do
   import NimbleParsec
   alias Liquid.Combinators.Tag
 
-  @type t :: [
-          capture: [
-            variable_name: String.t(),
-            parts: Liquid.NimbleParser.t()
-          ]
+  @type t :: [capture: Capture.markup()]
+
+  @type markup :: [
+          variable_name: String.t(),
+          parts: Liquid.NimbleParser.t()
         ]
 
+  @doc """
+  Parses a `Liquid` Capture tag, creates a Keyword list where the key is the name of the tag
+  (capture in this case) and the value is another keyword list which represent the internal
+  structure of the tag.
+  """
+  @spec tag() :: NimbleParsec.t()
   def tag do
     Tag.define_closed(
       "capture",
