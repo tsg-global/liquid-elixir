@@ -2,14 +2,15 @@ defmodule Liquid.Filters do
   @moduledoc """
   Applies a chain of filters passed from Liquid.Variable
   """
-  import Kernel, except: [round: 1, abs: 1]
+
   import Liquid.Utils, only: [to_number: 1]
 
   @filters_modules [
     Liquid.Filters.Functions,
     Liquid.Filters.Additionals,
     Liquid.Filters.HTML,
-    Liquid.Filters.List
+    Liquid.Filters.List,
+    Liquid.Filters.Math,
   ]
 
   defmodule Functions do
@@ -35,110 +36,6 @@ defmodule Liquid.Filters do
       input |> to_string |> String.capitalize()
     end
 
-    def plus(value, operand) when is_number(value) and is_number(operand) do
-      value + operand
-    end
-
-    def plus(value, operand) when is_number(value) do
-      plus(value, to_number(operand))
-    end
-
-    def plus(value, operand) do
-      value |> to_number |> plus(to_number(operand))
-    end
-
-    def minus(value, operand) when is_number(value) and is_number(operand) do
-      value - operand
-    end
-
-    def minus(value, operand) when is_number(value) do
-      minus(value, to_number(operand))
-    end
-
-    def minus(value, operand) do
-      value |> to_number |> minus(to_number(operand))
-    end
-
-    def times(value, operand) when is_integer(value) and is_integer(operand) do
-      value * operand
-    end
-
-    def times(value, operand) do
-      {value_int, value_len} = value |> get_int_and_counter
-      {operand_int, operand_len} = operand |> get_int_and_counter
-
-      case value_len + operand_len do
-        0 ->
-          value_int * operand_int
-
-        precision ->
-          Float.round(value_int * operand_int / :math.pow(10, precision), precision)
-      end
-    end
-
-    def divided_by(input, operand) when is_number(input) do
-      case {input, operand |> to_number} do
-        {_, 0} ->
-          raise ArithmeticError, message: "divided by 0"
-
-        {input, number_operand} when is_integer(input) ->
-          (input / number_operand) |> floor
-
-        {input, number_operand} ->
-          input / number_operand
-      end
-    end
-
-    def divided_by(input, operand) do
-      input |> to_number |> divided_by(operand)
-    end
-
-    def floor(input) when is_integer(input), do: input
-
-    def floor(input) when is_number(input), do: input |> trunc
-
-    def floor(input), do: input |> to_number |> floor
-
-    def floor(input, precision) when is_number(precision) do
-      input |> to_number |> Float.floor(precision)
-    end
-
-    def floor(input, precision) do
-      input |> floor(to_number(precision))
-    end
-
-    def ceil(input) when is_integer(input), do: input
-
-    def ceil(input) when is_number(input) do
-      input |> Float.ceil() |> trunc
-    end
-
-    def ceil(input), do: input |> to_number |> ceil
-
-    def ceil(input, precision) when is_number(precision) do
-      input |> to_number |> Float.ceil(precision)
-    end
-
-    def ceil(input, precision) do
-      input |> ceil(to_number(precision))
-    end
-
-    def round(input) when is_integer(input), do: input
-
-    def round(input) when is_number(input) do
-      input |> Float.round() |> trunc
-    end
-
-    def round(input), do: input |> to_number |> round
-
-    def round(input, precision) when is_number(precision) do
-      input |> to_number |> Float.round(precision)
-    end
-
-    def round(input, precision) do
-      input |> round(to_number(precision))
-    end
-
     @doc """
     Returns a single or plural word depending on input number
     """
@@ -149,24 +46,6 @@ defmodule Liquid.Filters do
     def pluralize(input, single, plural), do: input |> to_number |> pluralize(single, plural)
 
     defdelegate pluralise(input, single, plural), to: __MODULE__, as: :pluralize
-
-    def abs(input) when is_binary(input), do: input |> to_number |> abs
-
-    def abs(input) when input < 0, do: -input
-
-    def abs(input), do: input
-
-    def modulo(0, _), do: 0
-
-    def modulo(input, operand) when is_number(input) and is_number(operand) and input > 0,
-      do: input |> rem(operand)
-
-    def modulo(input, operand) when is_number(input) and is_number(operand) and input < 0,
-      do: modulo(input + operand, operand)
-
-    def modulo(input, operand) do
-      input |> to_number |> modulo(to_number(operand))
-    end
 
     def truncate(input, l \\ 50, truncate_string \\ "...")
 
@@ -318,22 +197,6 @@ defmodule Liquid.Filters do
     end
 
     def slice(nil, _), do: ""
-
-    # Helpers
-
-    defp get_int_and_counter(input) when is_integer(input), do: {input, 0}
-
-    defp get_int_and_counter(input) when is_number(input) do
-      {_, remainder} = input |> Float.to_string() |> Integer.parse()
-      len = String.length(remainder) - 1
-      new_value = input * :math.pow(10, len)
-      new_value = new_value |> Float.round() |> trunc
-      {new_value, len}
-    end
-
-    defp get_int_and_counter(input) do
-      input |> to_number |> get_int_and_counter
-    end
   end
 
   @doc """
