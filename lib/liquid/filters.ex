@@ -7,7 +7,8 @@ defmodule Liquid.Filters do
   alias Liquid.HTML
 
   @filters_modules [
-    Liquid.Filters.Functions
+    Liquid.Filters.Functions,
+    Liquid.Filters.Additionals
   ]
 
   defmodule Functions do
@@ -195,18 +196,6 @@ defmodule Liquid.Filters do
     def round(input, precision) do
       input |> round(to_number(precision))
     end
-
-    @doc """
-    Allows you to specify a fallback in case a value doesn’t exist.
-    `default` will show its value if the left side is nil, false, or empty
-    """
-    @spec default(any, any) :: any
-    def default(input, default_val \\ "")
-
-    def default(input, default_val) when input in [nil, false, '', "", [], {}, %{}],
-      do: default_val
-
-    def default(input, _), do: input
 
     @doc """
     Returns a single or plural word depending on input number
@@ -421,32 +410,6 @@ defmodule Liquid.Filters do
     end
 
     def url_encode(nil), do: nil
-
-    def date(input, format \\ "%F %T")
-
-    def date(nil, _), do: nil
-
-    def date(input, format) when is_nil(format) or format == "" do
-      input |> date
-    end
-
-    def date("now", format), do: Timex.now() |> date(format)
-
-    def date("today", format), do: Timex.now() |> date(format)
-
-    def date(input, format) when is_binary(input) do
-      with {:ok, input_date} <- NaiveDateTime.from_iso8601(input) do
-        input_date |> date(format)
-      else
-        {:error, :invalid_format} ->
-          with {:ok, input_date} <- Timex.parse(input, "%a %b %d %T %Y", :strftime),
-               do: input_date |> date(format)
-      end
-    end
-
-    def date(input, format) do
-      with {:ok, date_str} <- Timex.format(input, format, :strftime), do: date_str
-    end
 
     # Helpers
 
