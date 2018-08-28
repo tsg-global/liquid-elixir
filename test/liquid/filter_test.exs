@@ -104,21 +104,6 @@ defmodule Liquid.FilterTest do
     assert [] == Functions.split(nil, " ")
   end
 
-  test :escape do
-    assert "&lt;strong&gt;" == Functions.escape("<strong>")
-    assert "&lt;strong&gt;" == Functions.h("<strong>")
-  end
-
-  test :escape_once do
-    assert "&lt;strong&gt;Hulk&lt;/strong&gt;" ==
-             Functions.escape_once("&lt;strong&gt;Hulk</strong>")
-  end
-
-  test :url_encode do
-    assert "foo%2B1%40example.com" == Functions.url_encode("foo+1@example.com")
-    assert nil == Functions.url_encode(nil)
-  end
-
   test :truncatewords do
     assert "one two three" == Functions.truncatewords("one two three", 4)
     assert "one two..." == Functions.truncatewords("one two three", 2)
@@ -132,21 +117,6 @@ defmodule Liquid.FilterTest do
 
     assert "测试测试测试测试" == Functions.truncatewords("测试测试测试测试", 5)
     assert "one two three" == Functions.truncatewords("one two three", "4")
-  end
-
-  test :strip_html do
-    assert "test" == Functions.strip_html("<div>test</div>")
-    assert "test" == Functions.strip_html(~s{<div id="test">test</div>})
-
-    assert "" ==
-             Functions.strip_html(
-               ~S{<script type="text/javascript">document.write("some stuff");</script>}
-             )
-
-    assert "" == Functions.strip_html(~S{<style type="text/css">foo bar</style>})
-    assert "test" == Functions.strip_html(~S{<div\nclass="multiline">test</div>})
-    assert "test" == Functions.strip_html(~S{<!-- foo bar \n test -->test})
-    assert "" == Functions.strip_html(nil)
   end
 
   test :join do

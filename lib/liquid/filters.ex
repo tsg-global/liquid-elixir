@@ -4,11 +4,11 @@ defmodule Liquid.Filters do
   """
   import Kernel, except: [round: 1, abs: 1]
   import Liquid.Utils, only: [to_number: 1]
-  alias Liquid.HTML
 
   @filters_modules [
     Liquid.Filters.Functions,
-    Liquid.Filters.Additionals
+    Liquid.Filters.Additionals,
+    Liquid.Filters.HTML
   ]
 
   defmodule Functions do
@@ -339,14 +339,6 @@ defmodule Liquid.Filters do
       string |> String.trim_trailing()
     end
 
-    def strip_newlines(<<string::binary>>) do
-      string |> String.replace(~r/\r?\n/, "")
-    end
-
-    def newline_to_br(<<string::binary>>) do
-      string |> String.replace("\n", "<br />\n")
-    end
-
     def split(<<string::binary>>, <<separator::binary>>) do
       String.split(string, separator)
     end
@@ -384,32 +376,6 @@ defmodule Liquid.Filters do
     end
 
     def slice(nil, _), do: ""
-
-    def escape(input) when is_binary(input) do
-      input |> HTML.html_escape()
-    end
-
-    defdelegate h(input), to: __MODULE__, as: :escape
-
-    def escape_once(input) when is_binary(input) do
-      input |> HTML.html_escape_once()
-    end
-
-    def strip_html(nil), do: ""
-
-    def strip_html(input) when is_binary(input) do
-      input
-      |> String.replace(~r/<script.*?<\/script>/m, "")
-      |> String.replace(~r/<!--.*?-->/m, "")
-      |> String.replace(~r/<style.*?<\/style>/m, "")
-      |> String.replace(~r/<.*?>/m, "")
-    end
-
-    def url_encode(input) when is_binary(input) do
-      input |> URI.encode_www_form()
-    end
-
-    def url_encode(nil), do: nil
 
     # Helpers
 
