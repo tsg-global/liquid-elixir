@@ -13,7 +13,7 @@ defmodule Liquid.CustomFilterTest do
     def not_meaning_of_life(_), do: 2
   end
 
-  defmodule OverrideStandarFilter do
+  defmodule OverrideStandardFilter do
     @doc """
     This method overrides Liquid.Filters.List.size, returning always 0.
     """
@@ -21,7 +21,7 @@ defmodule Liquid.CustomFilterTest do
   end
 
   setup_all do
-    Application.put_env(:liquid, :extra_filter_modules, [MyFilter, MyFilterTwo, OverrideStandarFilter])
+    Application.put_env(:liquid, :extra_filter_modules, [MyFilter, MyFilterTwo, OverrideStandardFilter])
     Liquid.start()
     on_exit(fn -> Liquid.stop() end)
     :ok
