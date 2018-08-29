@@ -17,19 +17,17 @@ defmodule Liquid.Filters do
   @spec filter(list(), String.t()) :: String.t() | list()
   def filter([], value), do: value
 
-  def filter([filter | rest], value) do
-    [name, args] = filter
-
+  def filter([[name, args] | rest], value) do
     args =
       for arg <- args do
         Regex.replace(Liquid.quote_matcher(), arg, "")
       end
 
-    functions = @filters_modules |> Enum.map(&set_module/1) |> List.flatten()
-    custom_filters = Application.get_env(:liquid, :custom_filters)
+    standard_filter_module = @filters_modules |> Enum.flat_map(&set_module/1) |> Keyword.get(name)
+    custom_filter_module = Application.get_env(:liquid, :custom_filters, %{}) |> Map.get(name)
 
-    ret =
-      case {name, custom_filters[name], functions[name]} do
+    filtered_markup =
+      case {name, custom_filter_module, standard_filter_module} do
         # pass value in case of no filters
         {nil, _, _} ->
           value
@@ -40,13 +38,13 @@ defmodule Liquid.Filters do
 
         # Fallback to standard if no custom
         {_, nil, _} ->
-          apply_function(functions[name], name, [value | args])
+          apply_function(standard_filter_module, name, [value | args])
 
         _ ->
-          apply_function(custom_filters[name], name, [value | args])
+          apply_function(custom_filter_module, name, [value | args])
       end
 
-    filter(rest, ret)
+    filter(rest, filtered_markup)
   end
 
   @doc """

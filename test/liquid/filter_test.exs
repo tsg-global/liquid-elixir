@@ -4,7 +4,6 @@ defmodule Liquid.FilterTest do
   use ExUnit.Case
   use Timex
   alias Liquid.{Filters, Template, Variable}
-  alias Liquid.Filters.Functions
 
   setup_all do
     Liquid.start()
