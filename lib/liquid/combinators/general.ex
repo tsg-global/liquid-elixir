@@ -293,7 +293,6 @@ defmodule Liquid.Combinators.General do
   def liquid_variable do
     empty()
     |> choice([empty_liquid_variable(), not_empty_liquid_variable()])
-    |> optional(parsec(:__parse__))
   end
 
   def single_quoted_token do
