@@ -8,14 +8,19 @@ defmodule Liquid.Helpers do
     text |> Template.parse() |> Template.render(data) |> elem(1)
   end
 
+  def test_parse(markup, expected) do
+    {:ok, response} = NimbleParser.parse(markup)
+    assert response == expected
+  end
+
   def test_combinator(markup, combiner, expected) do
     {:ok, response, _, _, _, _} = combiner.(markup)
     assert response == expected
   end
 
-  def test_combinator_error(markup, combiner) do
-    {:error, _, _, _, _, _} = combiner.(markup)
-    assert true
+  def test_combinator_error(markup) do
+    {:error, message} = NimbleParser.parse(markup)
+    assert message != ""
   end
 
   def test_ast_translation(markup, params \\ %{}) do
