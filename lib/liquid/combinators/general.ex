@@ -202,6 +202,15 @@ defmodule Liquid.Combinators.General do
       string(@start_tag)
     ])
     |> reduce({List, :to_string, []})
+    |> traverse({Liquid.Combinators.General, :check_empty, []})
+  end
+
+  def check_empty(_rest, args, context, _line, _offset) do
+    if args == [""] do
+      {:error, "Not a valid literal"}
+    else
+      {args, context}
+    end
   end
 
   @doc """
