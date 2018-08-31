@@ -41,6 +41,7 @@ defmodule Liquid.NimbleParser do
           | String.t()
         ]
 
+  defparsec(:liquid_literal, General.liquid_literal())
   defparsec(:liquid_variable, General.liquid_variable())
   defparsec(:variable_definition, General.variable_definition())
   defparsec(:variable_name, General.variable_name())
@@ -74,19 +75,15 @@ defmodule Liquid.NimbleParser do
   defparsec(:variable_value, LexicalToken.variable_value())
   defparsec(:variable_part, LexicalToken.variable_part())
 
-  defp clean_empty_strings(_rest, args, context, _line, _offset) do
-    result =
-      args
-      |> Enum.filter(fn e -> e != "" end)
-
-    {result, context}
-  end
-
   defparsec(
     :__parse__,
-    General.liquid_literal()
-    |> optional(choice([parsec(:liquid_tag), parsec(:liquid_variable)]))
-    |> traverse({:clean_empty_strings, []})
+    empty()
+    |> choice([
+        parsec(:liquid_literal),
+        parsec(:liquid_tag),
+        parsec(:liquid_variable),
+      ])
+    |> optional(parsec(:__parse__))
   )
 
   defparsec(:assign, Assign.tag())
@@ -144,13 +141,18 @@ defmodule Liquid.NimbleParser do
   )
 
   @doc """
-  Validates and parse liquid markup
+  Validates and parse liquid markup.
   """
   @spec parse(String.t()) :: {:ok | :error, any()}
+  def parse(""), do: {:ok, []}
+
   def parse(markup) do
     case __parse__(markup) do
       {:ok, template, "", _, _, _} ->
         {:ok, template}
+
+      {:error, mesagge, _, _, _, _} ->
+        {:error, "#{mesagge}"}
 
       {:ok, _, rest, _, _, _} ->
         {:error, "Error parsing: #{rest}"}
