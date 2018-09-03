@@ -154,8 +154,8 @@ defmodule Liquid.NimbleParser do
       {:error, message, _, _, _, _} ->
         {:error, "#{message}"}
 
-      {:ok, _, rest, _, _, _} ->
-        {:error, "Error parsing: #{rest}"}
+      {:ok, _, incorrect_markup, _, _, _} ->
+        {:error, "Error parsing: #{incorrect_markup}"}
     end
   end
 end
