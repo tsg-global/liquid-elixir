@@ -1,6 +1,6 @@
 defmodule Liquid.NimbleParser do
   @moduledoc """
-  Transform a valid liquid markup in an AST to be executed by `render`
+  Transform a valid liquid markup in an AST to be executed by `render`.
   """
   import NimbleParsec
 
@@ -19,7 +19,9 @@ defmodule Liquid.NimbleParser do
     Tablerow,
     Case,
     Capture,
-    Ifchanged
+    Ifchanged,
+    CustomTag,
+    CustomBlock
   }
 
   @type t :: [
@@ -37,6 +39,7 @@ defmodule Liquid.NimbleParser do
           | Tablerow.t()
           | Case.t()
           | Ifchanged.t()
+          | Custom.t()
           | General.liquid_variable()
           | String.t()
         ]
@@ -63,6 +66,7 @@ defmodule Liquid.NimbleParser do
   defparsec(:ignore_whitespaces, General.ignore_whitespaces())
   defparsec(:condition, General.condition())
   defparsec(:logical_condition, General.logical_condition())
+  # defparsec(:custom_tag, General.custom_tag())
 
   defparsec(:null_value, LexicalToken.null_value())
   defparsec(:number, LexicalToken.number())
@@ -82,6 +86,8 @@ defmodule Liquid.NimbleParser do
         parsec(:liquid_literal),
         parsec(:liquid_tag),
         parsec(:liquid_variable),
+        parsec(:custom_block),
+        parsec(:custom_tag)
       ])
     |> optional(parsec(:__parse__))
   )
@@ -91,7 +97,7 @@ defmodule Liquid.NimbleParser do
   defparsec(:decrement, Decrement.tag())
   defparsec(:increment, Increment.tag())
 
-  defparsecp(:comment_content, Comment.comment_content())
+  defparsec(:comment_content, Comment.comment_content())
   defparsec(:comment, Comment.tag())
 
   defparsec(:cycle_values, Cycle.cycle_values())
@@ -117,6 +123,8 @@ defmodule Liquid.NimbleParser do
 
   defparsec(:case, Case.tag())
   defparsec(:clauses, Case.clauses())
+  defparsec(:custom_tag, CustomTag.tag())
+  defparsec(:custom_block, CustomBlock.block())
 
   defparsec(
     :liquid_tag,
