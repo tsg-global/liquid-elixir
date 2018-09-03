@@ -126,11 +126,9 @@ defmodule Liquid.Combinators.Tags.AssignTest do
     )
   end
 
-  # test "incorrect variable assignment" do
-  #   test_combinator_error("{% assign cart@ = 5 %}")
-  #   test_combinator_error("{% assign cart. = 5 %}")
-  #   test_combinator_error("{% assign .cart = 5 %}")
-  #   # TODO: this must fails
-  #   # test_combinator_error("{% assign cart? = 5 %}")
-  # end
+  test "incorrect variable assignment" do
+    test_combinator_error("{% assign cart@ = 5 %}")
+    test_combinator_error("{% assign cart. = 5 %}")
+    test_combinator_error("{% assign .cart = 5 %}")
+  end
 end
