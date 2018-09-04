@@ -23,16 +23,6 @@ defmodule Liquid.Combinators.Tags.CustomTag do
     |> unwrap_and_tag(:custom_markup)
   end
 
-  def check_close_tag(_rest, args, context, _line, _offset) do
-    tags_name = Keyword.get_values(args, :custom_name)
-    [opened_name, closed_name] = tags_name
-
-    case opened_name == "end" <> closed_name do
-      true -> {args, context}
-      false -> {:error, "#{opened_name} #{closed_name}"}
-    end
-  end
-
   defp valid_markup() do
     repeat_until(utf8_char([]), [string("{%"), string("%}"), string("{{"), string("}}")])
   end

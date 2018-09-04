@@ -39,7 +39,8 @@ defmodule Liquid.NimbleParser do
           | Tablerow.t()
           | Case.t()
           | Ifchanged.t()
-          | Custom.t()
+          | CustomTag.t()
+          | CustomBlock.t()
           | General.liquid_variable()
           | String.t()
         ]
