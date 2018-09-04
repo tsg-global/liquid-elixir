@@ -1,7 +1,14 @@
 defmodule Liquid.Translators.Tags.CustomBlock do
+  @moduledoc """
+  Translate new AST to old AST for the Custom tag block.
+  """
   alias Liquid.Translators.General
   alias Liquid.{Template, Block}
 
+  @doc """
+  Takes the markup of the new AST, creates a `Liquid.Block` struct (old AST) and fill the keys needed to render a Custom tag block.
+  """
+  @spec translate(CustomBlock.markup()) :: Block.t()
   def translate(custom_name: name, custom_markup: markup, body: body) do
     tag_name = String.to_atom(name)
     custom_tags = Application.get_env(:liquid, :extra_tags)
