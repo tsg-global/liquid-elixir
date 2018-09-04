@@ -97,6 +97,8 @@ defmodule Liquid.Combinators.Tags.CustomTag do
       "endcase",
       "when",
       "assign",
+      "decrement",
+      "increment",
       "if",
       "endif",
       "unless",
