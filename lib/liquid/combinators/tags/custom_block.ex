@@ -7,14 +7,6 @@ defmodule Liquid.Combinators.Tags.CustomBlock do
     |> unwrap_and_tag(:custom_name)
   end
 
-  defp markup do
-    empty()
-    |> parsec(:ignore_whitespaces)
-    |> concat(valid_markup())
-    |> reduce({List, :to_string, []})
-    |> unwrap_and_tag(:custom_markup)
-  end
-
   def opener_custom_tag do
     parsec(:start_tag)
     |> concat(end_name())
@@ -62,6 +54,14 @@ defmodule Liquid.Combinators.Tags.CustomBlock do
     end
   end
 
+  defp markup do
+    empty()
+    |> parsec(:ignore_whitespaces)
+    |> concat(valid_markup())
+    |> reduce({List, :to_string, []})
+    |> unwrap_and_tag(:custom_markup)
+  end
+
   defp fix_parse(
          custom_name: _endname,
          body: body,
@@ -106,36 +106,4 @@ defmodule Liquid.Combinators.Tags.CustomBlock do
        do: true
 
   defp liquid_tags_without_customs?([_]), do: false
-
-  def register_tags() do
-    case Application.get_env(:liquid, :extra_tags) do
-      nil ->
-        false
-
-      map ->
-        Enum.map(map, &CustomTag.simplify(&1))
-        |> Enum.filter(fn {_key, type} -> type == Block end)
-        |> Enum.map(fn {key, _type} -> "#{key}" end)
-    end
-  end
-
-  def all_tags do
-    List.flatten([
-      Liquid.Combinators.Tags.CustomBlock.end_register_tag_name()
-      | Liquid.Combinators.Tags.CustomTag.liquid_tags()
-    ])
-  end
-
-  def end_register_tag_name do
-    list = register_tags()
-
-    case list do
-      false ->
-        []
-
-      _ ->
-        new_list = Enum.map(list, fn x -> "end#{x}" end)
-        [new_list | register_tags()]
-    end
-  end
 end
