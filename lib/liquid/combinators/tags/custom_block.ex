@@ -20,8 +20,8 @@ defmodule Liquid.Combinators.Tags.CustomBlock do
         ]
 
   @doc """
-  Parses a  Custom tag of type block, creates a Keyword list where the key `:custom_block`
-  and the value is another keyword list which have a name , markup, body and end name.
+  Parses a Custom tag of type block, creates a Keyword list where the key is `:custom_block`
+  and the value is another keyword list which have a name, markup, body and end name.
   """
   @spec block() :: NimbleParsec.t()
   def block do
@@ -33,7 +33,7 @@ defmodule Liquid.Combinators.Tags.CustomBlock do
   end
 
   @doc """
-  Check if the closed tag name correspond to the opened tag name.
+  Checks if the closed tag name correspond to the opened tag name.
   """
   @spec check_close_tag(String.t(), list(), map(), tuple(), tuple()) :: tuple()
   def check_close_tag(_rest, args, context, _line, _offset) do
@@ -47,7 +47,7 @@ defmodule Liquid.Combinators.Tags.CustomBlock do
   end
 
   @doc """
-  Check if the name parsed is not a `Liquid` tag.
+  Checks if the name parsed is a `Liquid` tag.
   """
   @spec check_string_closed(String.t(), list(), map(), tuple(), tuple()) :: tuple()
   def check_string_closed(_rest, args, context, _line, _offset) do
