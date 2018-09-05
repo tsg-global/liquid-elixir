@@ -1,6 +1,6 @@
 defmodule Liquid.Translators.Tags.CustomTag do
   @moduledoc """
-  Translate new AST to old AST for the Custom tag.
+  Translates new AST to old AST for the Custom tag.
   """
   alias Liquid.{Template, Tag}
 

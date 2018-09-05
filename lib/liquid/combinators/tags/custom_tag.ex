@@ -6,7 +6,7 @@ defmodule Liquid.Combinators.Tags.CustomTag do
   and the type that implements it (tag or block).
 
   ```
-    {% MyCustomTag argument1 =1, argument2, argument3 = 5 %}
+    {% MyCustomTag argument1 = 1, argument2, argument3 = 5 %}
   ```
 
   """
@@ -71,7 +71,8 @@ defmodule Liquid.Combinators.Tags.CustomTag do
   end
 
   @doc """
-  Parses a `Liquid` Custom tag's name, isolates custom tag name from markup.
+  It returns Custom tag's name. If tag is called equal to Liquid registered tag, this function returns a map with an error causing
+  Nimble Parser stops its excecution.
   """
   @spec check_string(rest :: String.t, args :: String.t, context :: Map.t, line :: Integer.t, offset :: Integer.t) :: Keyword.t()
   def check_string(_rest, args, context, _line, _offset) do
@@ -109,7 +110,8 @@ defmodule Liquid.Combinators.Tags.CustomTag do
     ])
   end
   @doc """
-  Return a List of Liquid reserved tag's name, includind end block types.
+  This function returns a List of Liquid reserved tag's name, also contains end block types names. It is used in order to verify
+  custom tags will not be called with a registered tag's name.
   """
   @spec liquid_tags() :: List.t()
   def liquid_tags do
@@ -142,12 +144,11 @@ defmodule Liquid.Combinators.Tags.CustomTag do
     ]
   end
   @doc """
-  Return a List of Liquid reserved end tag's name, includind tag names.
+  It checks correct end tags for a given open tag.
   """
   @spec end_register_tag_name() :: List.t()
   def end_register_tag_name do
     list = register_tags()
-
     case list do
       false ->
         []
@@ -158,7 +159,7 @@ defmodule Liquid.Combinators.Tags.CustomTag do
     end
   end
   @doc """
-  Return a Keyword resulting of transformation of custom tag and type (tag or block).
+  Returns a Keyword resulting of transformation of custom tag and type (tag or block).
   `{key, Tag}`
   `{key, Block}`
 
