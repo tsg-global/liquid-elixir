@@ -1,6 +1,12 @@
 defmodule Liquid.Combinators.Tags.CustomBlock do
   @moduledoc """
-  Allows to parse a user's custom tag block.
+  Implementation of custom tag. "Blocks" are tags that take  a markup and have the a special characteristic, they have a closing tag and perform a transformation of the content between the two.
+  To create a new tag, Use Liquid.Register module and register your tag with Liquid.Register.register/3.
+  The register tag  takes three arguments: the user-facing name of the tag, the module where code of parsing/rendering is located
+  and the type that implements it (tag or block).
+  ```
+   {% MyCustomTag anything here %}code submitted to transformation{% endMyCustomTag%}
+  ```
   """
   import NimbleParsec
   alias Liquid.Combinators.Tags.CustomTag
