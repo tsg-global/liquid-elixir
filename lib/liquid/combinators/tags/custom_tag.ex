@@ -50,7 +50,7 @@ defmodule Liquid.Combinators.Tags.CustomTag do
     case liquid_tag_name?(args) do
       true ->
         {:error,
-         "Invalid tag name #{args}, 1.-if the tag is a block is malformed  2.- the same name of a liquid tag for a custom tag"}
+         "Invalid tag name #{args},The tag block is malformed or you are using a reserved tag name to define a Custom Tag"}
 
       false ->
         {args, context}

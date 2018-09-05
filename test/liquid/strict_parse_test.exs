@@ -43,7 +43,7 @@ defmodule Liquid.StrictParseTest do
 
   test "missing endtag parse time error" do
     assert_raise RuntimeError,
-                 "Invalid tag name for, 1.-if the tag is a block is malformed  2.- the same name of a liquid tag for a custom tag",
+                 "Invalid tag name for,The tag block is malformed or you are using a reserved tag name to define a Custom Tag",
                  fn ->
                    Template.parse("{% for a in b %} ...")
                  end
@@ -51,7 +51,7 @@ defmodule Liquid.StrictParseTest do
 
   test "unrecognized operator" do
     assert_raise RuntimeError,
-                 "Invalid tag name if, 1.-if the tag is a block is malformed  2.- the same name of a liquid tag for a custom tag",
+                 "Invalid tag name if,The tag block is malformed or you are using a reserved tag name to define a Custom Tag",
                  fn ->
                    Template.parse("{% if 1 =! 2 %}ok{% endif %}")
                  end
