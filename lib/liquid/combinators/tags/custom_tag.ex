@@ -77,8 +77,12 @@ defmodule Liquid.Combinators.Tags.CustomTag do
   @spec check_string(rest :: String.t, args :: String.t, context :: Map.t, line :: Integer.t, offset :: Integer.t) :: Keyword.t()
   def check_string(_rest, args, context, _line, _offset) do
     case liquid_tag_name?(args) do
-      true -> {:error, "Invalid tag name"}
-      false -> {args, context}
+      true ->
+        {:error,
+         "Invalid tag name #{args},The tag block is malformed or you are using a reserved tag name to define a Custom Tag"}
+
+      false ->
+        {args, context}
     end
   end
 
@@ -120,6 +124,8 @@ defmodule Liquid.Combinators.Tags.CustomTag do
       "endcase",
       "when",
       "assign",
+      "decrement",
+      "increment",
       "if",
       "endif",
       "unless",
