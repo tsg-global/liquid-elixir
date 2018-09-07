@@ -39,7 +39,8 @@ defmodule Liquid.NimbleParser do
           | Tablerow.t()
           | Case.t()
           | Ifchanged.t()
-          | Custom.t()
+          | CustomTag.t()
+          | CustomBlock.t()
           | General.liquid_variable()
           | String.t()
         ]
@@ -66,7 +67,6 @@ defmodule Liquid.NimbleParser do
   defparsec(:ignore_whitespaces, General.ignore_whitespaces())
   defparsec(:condition, General.condition())
   defparsec(:logical_condition, General.logical_condition())
-  # defparsec(:custom_tag, General.custom_tag())
 
   defparsec(:null_value, LexicalToken.null_value())
   defparsec(:number, LexicalToken.number())
@@ -83,12 +83,12 @@ defmodule Liquid.NimbleParser do
     :__parse__,
     empty()
     |> choice([
-        parsec(:liquid_literal),
-        parsec(:liquid_tag),
-        parsec(:liquid_variable),
-        parsec(:custom_block),
-        parsec(:custom_tag)
-      ])
+      parsec(:liquid_literal),
+      parsec(:liquid_tag),
+      parsec(:liquid_variable),
+      parsec(:custom_block),
+      parsec(:custom_tag)
+    ])
     |> optional(parsec(:__parse__))
   )
 
