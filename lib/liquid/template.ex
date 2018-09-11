@@ -75,22 +75,6 @@ defmodule Liquid.Template do
 
   @spec parse(nil, map) :: Liquid.Template
   def parse(nil, presets) do
-    Liquid.Parse.parse("", %Template{presets: presets})
-  end
-
-  # TODO: delete this when new parser is finished
-  @doc """
-  OLD_PARSER for TEST ONLY Function to parse markup with given presets (if any)
-  """
-  @spec old_parse(String.t(), map) :: Liquid.Template
-  def old_parse(value, presets \\ %{})
-
-  def old_parse(<<markup::binary>>, presets) do
-    Liquid.Parse.parse(markup, %Template{presets: presets})
-  end
-
-  @spec old_parse(nil, map) :: Liquid.Template
-  def old_parse(nil, presets) do
-    Liquid.Parse.parse("", %Template{presets: presets})
+    parse("", %Template{presets: presets})
   end
 end
