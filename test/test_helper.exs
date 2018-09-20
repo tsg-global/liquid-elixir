@@ -36,3 +36,20 @@ defmodule Liquid.Helpers do
     assert old == new
   end
 end
+
+# TODO: this module must be deleted after finish the work with the new Parser
+
+defmodule Liquid.HelpersFast do
+  use ExUnit.Case
+  alias Liquid.Parser
+
+  def test_parse(markup, expected) do
+    {:ok, response} = Parser.parse(markup)
+    assert response == expected
+  end
+
+  def test_combinator_error(markup) do
+    {:error, message, _rest} = Parser.parse(markup)
+    assert message != ""
+  end
+end
