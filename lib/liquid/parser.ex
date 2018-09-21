@@ -120,7 +120,7 @@ defmodule Liquid.Parser do
   defparsec(:continue_tag, For.continue_tag())
   defparsec(:for, For.tag())
 
-  defparsec(:tablerow, Tablerow.tag())
+  defparsec(:tablerow, Tablerow.tag2())
 
   defparsec(:case, Case.tag())
   defparsec(:clauses, Case.clauses())
@@ -142,8 +142,8 @@ defmodule Liquid.Parser do
       # parsec(:for),
       # parsec(:break_tag),
       # parsec(:continue_tag),
-      # parsec(:tablerow),
       parsec(:unless),
+      parsec(:tablerow),
       parsec(:end_block),
       # parsec(:case),
       # parsec(:ifchanged)
