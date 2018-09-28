@@ -5,56 +5,30 @@ defmodule Liquid.Ast do
   Literals (any markup which is not liquid variable or tag) are slow to be processed by Nimble thus
   this module improve performance between 30% and 100% depending how much text is processed.
   """
-  alias Liquid.{Tokenizer, Parser}
+  alias Liquid.{Tokenizer, Parser, Block}
 
   @doc """
   Recursively builds the AST taking a markup, or a tuple with a literal and a rest markup.
-  It uses a context to validate the correct opening and close of blocks and sub blocks.
+  It uses `context` to validate the correct opening and close of blocks and sub blocks.
   """
   @spec build(String.t() | {String.t(), String.t()}, Keyword.t(), List.t()) ::
           {:ok, List.t(), Keyword.t(), String.t()} | {:error, String.t(), String.t()}
   def build({literal, ""}, context, ast), do: {:ok, Enum.reverse([literal | ast]), context, ""}
-  def build({"", markup}, context, ast), do: process_liquid(markup, context, ast)
-  def build({literal, markup}, context, ast), do: process_liquid(markup, context, [literal | ast])
+  def build({"", markup}, context, ast), do: parse_liquid(markup, context, ast)
+  def build({literal, markup}, context, ast), do: parse_liquid(markup, context, [literal | ast])
+  def build("", context, ast), do: {:ok, Enum.reverse(ast), context, ""}
+  def build(markup, context, ast), do: markup |> Tokenizer.tokenize() |> build(context, ast)
 
-  def build("", context, ast), do: {:ok, ast, context, ""}
-  def build(markup, context, ast) do
-    markup |> Tokenizer.tokenize() |> build(context, ast)
-  end
-
+  @spec build({:error, binary(), binary()}) :: {:error, binary(), binary()}
   def build({:error, error_message, rest_markup}), do: {:error, error_message, rest_markup}
 
-  defp build_block(markup, [{tag, content}], context, ast) do
-    case build(markup, context, []) do
-      {:ok, acc, block_context, rest} ->
-        build(rest, block_context, [
-          {tag, Enum.reverse(Keyword.put(content, :body, Enum.reverse(acc)))} | ast
-        ])
+  defp parse_liquid(markup, context, ast), do: markup |> Parser.__parse__(context: context) |> do_parse_liquid(ast)
+  defp do_parse_liquid({:ok, [{:error, message}], rest, _, _, _}, _), do: {:error, message, rest}
+  defp do_parse_liquid({:ok, [{:block, _}], _, _, _, _} = liquid, ast), do: block(liquid, ast)
+  defp do_parse_liquid({:ok, [{:sub_block, _}] = tag, rest, context, _, _}, ast), do: {:ok, [tag | ast], context, rest}
+  defp do_parse_liquid({:ok, [{:end_block, _}] = tag, rest, context, _, _}, ast), do: {:ok, [tag | ast], context, rest}
+  defp do_parse_liquid({:ok, [tags], rest, context, _, _}, ast), do: build(rest, context, [tags | ast])
+  defp do_parse_liquid({:error, message, rest, _, _, _}, _), do: {:error, message, rest}
 
-      {:error, error_message, rest_markup} ->
-        {:error, error_message, rest_markup}
-    end
-  end
-
-  defp process_liquid(markup, context, ast) do
-    case Parser.__parse__(markup, context: context) do
-      {:ok, [{:error, message}], rest, _, _, _} ->
-        {:error, message, rest}
-
-      {:ok, [{:end_block, _}], rest, nimble_context, _line, _offset} ->
-        {:ok, ast, nimble_context, rest}
-
-      {:ok, [{:block, content}], markup, nimble_context, _line, _offset} ->
-        build_block(markup, content, nimble_context, ast)
-
-      {:ok, [acc], "", nimble_context, _, _} ->
-        {:ok, Enum.reverse([acc | ast]), nimble_context, ""}
-
-      {:ok, [acc], markup, nimble_context, _line, _offset} ->
-        build(markup, nimble_context, [acc | ast])
-
-      {:error, error_message, rest_markup, _nimble_context, _line, _offset} ->
-        {:error, error_message, rest_markup}
-    end
-  end
+  defp block({:ok, [{:block, [tag]}], markup, context, _, _}, ast), do: Block.build(markup, tag, [], [], context, ast)
 end

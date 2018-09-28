@@ -2,14 +2,14 @@ ExUnit.start(exclude: [:skip])
 
 defmodule Liquid.Helpers do
   use ExUnit.Case
-  alias Liquid.{Template, NimbleParser, NimbleTranslator}
+  alias Liquid.{Template, Parser, NimbleTranslator}
 
   def render(text, data \\ %{}) do
     text |> Template.parse() |> Template.render(data) |> elem(1)
   end
 
   def test_parse(markup, expected) do
-    {:ok, response} = NimbleParser.parse(markup)
+    {:ok, response} = Parser.parse(markup)
     assert response == expected
   end
 
@@ -18,9 +18,13 @@ defmodule Liquid.Helpers do
     assert response == expected
   end
 
-  def test_combinator_error(markup) do
-    {:error, message} = NimbleParser.parse(markup)
+  def test_combinator_error(markup, expected_message \\ nil) do
+    {:error, message, _rest} = Parser.parse(markup)
     assert message != ""
+
+    if expected_message do
+      assert expected_message == message
+    end
   end
 
   def test_ast_translation(markup, params \\ %{}) do
@@ -28,28 +32,11 @@ defmodule Liquid.Helpers do
 
     new =
       markup
-      |> NimbleParser.parse()
+      |> Parser.parse()
       |> NimbleTranslator.translate()
       |> Template.render(params)
       |> elem(1)
 
     assert old == new
-  end
-end
-
-# TODO: this module must be deleted after finish the work with the new Parser
-
-defmodule Liquid.HelpersFast do
-  use ExUnit.Case
-  alias Liquid.Parser
-
-  def test_parse(markup, expected) do
-    {:ok, response} = Parser.parse(markup)
-    assert response == expected
-  end
-
-  def test_combinator_error(markup) do
-    {:error, message, _rest} = Parser.parse(markup)
-    assert message != ""
   end
 end

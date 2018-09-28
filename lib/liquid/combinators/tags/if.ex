@@ -38,7 +38,7 @@ defmodule Liquid.Combinators.Tags.If do
   @spec elsif_tag() :: NimbleParsec.t()
   def elsif_tag do
     "elsif"
-    |> Tag.open_tag(&predicate/1)
+    |> Tag.open_tag(&General.conditions/1)
     |> parsec(:body_elsif)
     |> tag(:elsif)
     |> optional(parsec(:__parse__))
@@ -84,13 +84,7 @@ defmodule Liquid.Combinators.Tags.If do
   end
 
   defp do_tag(name) do
-    Tag.define_closed(name, &predicate/1, fn combinator -> concat(combinator, body()) end)
-  end
-
-  defp predicate(combinator) do
-    combinator
-    |> General.conditions()
-    |> tag(:conditions)
+    Tag.define_closed(name, &General.conditions/1, fn combinator -> concat(combinator, body()) end)
   end
 
   # new version
@@ -98,7 +92,9 @@ defmodule Liquid.Combinators.Tags.If do
   def tag2, do: do_tag2("if")
   def unless_tag2, do: do_tag2("unless")
 
+  def elsif_tag2, do: Tag.define_sub_block("elsif", ["if", "unless"], &General.conditions/1)
+
   defp do_tag2(name) do
-    Tag.define_block(name, &predicate/1)
+    Tag.define_block(name, &General.conditions/1)
   end
 end

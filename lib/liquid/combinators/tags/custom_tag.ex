@@ -22,6 +22,35 @@ defmodule Liquid.Combinators.Tags.CustomTag do
   structure of the tag (arguments).
   """
   @spec tag() :: NimbleParsec.t()
+  def tag2 do
+    empty()
+    |> parsec(:start_tag)
+    |> concat(General.valid_tag_name())
+    |> optional(markup())
+    |> parsec(:end_tag)
+    |> traverse({__MODULE__, :check_customs, []})
+  end
+
+  def check_customs(_, [params | tag], %{tags: tags} = context, _, _) do
+    [tag_name] = tag
+    name = String.to_atom(tag_name)
+
+    Application.get_env(:liquid, :extra_tags, %{})
+    |> Map.get(name)
+    |> case do
+      nil ->
+        {[error:
+          "Error processing tag '#{tag}'. It is malformed or you are creating a custom '#{tag}' without register it"
+          ], context}
+
+      {_, Liquid.Block} ->
+        {[block: [custom: [{:custom_name, tag}, params]]], %{context | tags: [tag_name | tags]}}
+
+      {_, Liquid.Tag} ->
+        {[custom: [{:custom_name, tag}, params]], context}
+    end
+  end
+
   def tag do
     parsec(:start_tag)
     |> concat(name())
@@ -74,7 +103,13 @@ defmodule Liquid.Combinators.Tags.CustomTag do
   It returns Custom tag's name. If tag is called equal to Liquid registered tag, this function returns a map with an error causing
   Nimble Parser stops its excecution.
   """
-  @spec check_string(rest :: String.t, args :: String.t, context :: Map.t, line :: Integer.t, offset :: Integer.t) :: Keyword.t()
+  @spec check_string(
+          rest :: String.t(),
+          args :: String.t(),
+          context :: Map.t(),
+          line :: Integer.t(),
+          offset :: Integer.t()
+        ) :: Keyword.t()
   def check_string(_rest, args, context, _line, _offset) do
     case liquid_tag_name?(args) do
       true ->
@@ -113,6 +148,7 @@ defmodule Liquid.Combinators.Tags.CustomTag do
       | Liquid.Combinators.Tags.CustomTag.liquid_tags()
     ])
   end
+
   @doc """
   This function returns a List of Liquid reserved tag's name, also contains end block types names. It is used in order to verify
   custom tags will not be called with a registered tag's name.
@@ -149,12 +185,14 @@ defmodule Liquid.Combinators.Tags.CustomTag do
       ""
     ]
   end
+
   @doc """
-  It checks correct end tags for a given open tag.
+  Checks correct end tags for a given open tag.
   """
   @spec end_register_tag_name() :: List.t()
   def end_register_tag_name do
     list = register_tags()
+
     case list do
       false ->
         []
@@ -164,17 +202,9 @@ defmodule Liquid.Combinators.Tags.CustomTag do
         [new_list | register_tags()]
     end
   end
-  @doc """
-  Returns a Keyword resulting of transformation of custom tag and type (tag or block).
-  `{key, Tag}`
-  `{key, Block}`
 
-  """
-  @spec simplify({key :: atom, {tag_name :: atom, tag_type :: String.t}}) :: Tupple.t()
-  def simplify({key, {tag_name, tag_type}}), do: simplify_helper({key, {tag_name, tag_type}})
-
-  defp simplify_helper({key, {_, Liquid.Block}}), do: {key, Block}
-  defp simplify_helper({key, {_, Block}}), do: {key, Block}
-  defp simplify_helper({key, {_, Tag}}), do: {key, Tag}
-  defp simplify_helper({key, {_, Liquid.Tag}}), do: {key, Tag}
+  defp simplify({key, {_, Liquid.Block}}), do: {key, Block}
+  defp simplify({key, {_, Block}}), do: {key, Block}
+  defp simplify({key, {_, Tag}}), do: {key, Tag}
+  defp simplify({key, {_, Liquid.Tag}}), do: {key, Tag}
 end

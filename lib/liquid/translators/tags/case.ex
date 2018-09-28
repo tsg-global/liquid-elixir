@@ -10,95 +10,21 @@ defmodule Liquid.Translators.Tags.Case do
   Takes the markup of the new AST, creates a `Liquid.Block` struct (old AST) and fill the keys needed to render a Case tag.
   """
   @spec translate(Case.markup()) :: Block.t()
-  def translate([nil]) do
-    to_case_block("null", [])
+  def translate([condition, {:body, _} | when_list]) do
+    to_case_block(Markup.literal(condition), Enum.flat_map(when_list, &process_clauses/1))
   end
 
-  def translate([nil, {:clauses, clauses}]) do
-    create_block_for_case("null", clauses)
-  end
-
-  def translate([nil, {:clauses, clauses}, {:else, else_tag_values}]) do
-    create_block_for_case("null", clauses, else_tag_values)
-  end
-
-  def translate([nil, {:else, else_tag_values}]) do
-    create_block_for_case_else("null", else_tag_values)
-  end
-
-  def translate([nil, literal, {:clauses, clauses}]) do
-    create_block_for_case("null", literal, clauses)
-  end
-
-  def translate([nil, literal, {:clauses, clauses}, {:else, else_tag_values}]) do
-    create_block_for_case("null", literal, clauses, else_tag_values)
-  end
-
-  def translate([nil, literal, {:else, else_tag_values}]) do
-    create_block_for_case_else("null", literal, else_tag_values)
-  end
-
-  def translate([nil, literal]) do
-    to_case_block("null", [literal])
-  end
-
-  def translate([value]) do
-    markup = Markup.literal(value)
-    to_case_block(markup, [])
-  end
-
-  def translate([value, {:clauses, clauses}]) do
-    create_block_for_case(Markup.literal(value), clauses)
-  end
-
-  def translate([value, {:clauses, clauses}, {:else, else_tag_values}]) do
-    create_block_for_case(Markup.literal(value), clauses, else_tag_values)
-  end
-
-  def translate([value, {:else, else_tag_values}]) do
-    create_block_for_case_else(Markup.literal(value), else_tag_values)
-  end
-
-  def translate([value, literal, {:clauses, clauses}]) do
-    create_block_for_case(Markup.literal(value), literal, clauses)
-  end
-
-  def translate([value, literal, {:clauses, clauses}, {:else, else_tag_values}]) do
-    create_block_for_case(Markup.literal(value), literal, clauses, else_tag_values)
-  end
-
-  def translate([value, literal, {:else, else_tag_values}]) do
-    create_block_for_case_else(Markup.literal(value), literal, else_tag_values)
-  end
-
-  def translate([value, literal]) do
-    markup = Markup.literal(value)
-    nodelist = [literal]
-    to_case_block(markup, nodelist)
-  end
-
-  defp when_to_nodelist({:when, [conditions: [head | tail], body: values]})
-       when is_bitstring(head) do
+  defp process_clauses({:when, [condition, body: values]}) do
     tag = %Liquid.Tag{
       name: :when,
-      markup: "\"#{Markup.literal(head)}\"" <> Markup.literal(tail)
+      markup: Markup.literal(condition)
     }
 
     result = NimbleTranslator.process_node(values)
     [tag, result]
   end
 
-  defp when_to_nodelist({:when, [conditions: conditions, body: values]}) do
-    tag = %Liquid.Tag{
-      name: :when,
-      markup: Markup.literal(conditions)
-    }
-
-    result = NimbleTranslator.process_node(values)
-    [tag, result]
-  end
-
-  defp else_tag(values) do
+  defp process_clauses({:else, [body: values]}) do
     process_list = NimbleTranslator.process_node(values)
 
     else_liquid_tag = %Liquid.Tag{name: :else}

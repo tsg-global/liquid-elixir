@@ -56,6 +56,6 @@ defmodule Liquid.Translators.Markup do
 
   # This is to manage the strings and nulls to string
   defp normalize_value(value) when is_nil(value), do: "null"
-  defp normalize_value(value) when is_bitstring(value), do: "\"#{literal(value)}\""
+  defp normalize_value(value) when is_bitstring(value), do: "\"#{value}\""
   defp normalize_value(value), do: literal(value)
 end

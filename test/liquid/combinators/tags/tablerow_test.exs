@@ -18,7 +18,8 @@ defmodule Liquid.Combinators.Tags.TablerowTest do
             variable: [parts: [part: "item"]],
             value: {:variable, [parts: [part: "array"]]},
             params: []
-          ]
+          ],
+          body: []
         ]
       )
     end)
@@ -40,7 +41,8 @@ defmodule Liquid.Combinators.Tags.TablerowTest do
             variable: [parts: [part: "item"]],
             value: {:variable, [parts: [part: "array"]]},
             params: [limit: [2]]
-          ]
+          ],
+          body: []
         ]
       )
     end)
@@ -61,7 +63,8 @@ defmodule Liquid.Combinators.Tags.TablerowTest do
             variable: [parts: [part: "item"]],
             value: {:variable, [parts: [part: "array"]]},
             params: [offset: [2]]
-          ]
+          ],
+          body: []
         ]
       )
     end)
@@ -82,7 +85,8 @@ defmodule Liquid.Combinators.Tags.TablerowTest do
             variable: [parts: [part: "item"]],
             value: {:variable, [parts: [part: "array"]]},
             params: [cols: [2]]
-          ]
+          ],
+          body: []
         ]
       )
     end)
@@ -145,16 +149,10 @@ defmodule Liquid.Combinators.Tags.TablerowTest do
   end
 
   test "tablerow tag: invalid tag structure and variable values" do
-    test_combinator_error(
-      "{% tablerow i in (my_var..10) %}{{ i }}{% else %}{% else %}{% endtablerow %}"
-    )
+    test_combinator_error("{% tablerow i in (my_var..10) %}{{ i }}{% else %}{% else %}{% endtablerow %}")
 
-    test_combinator_error(
-      "{% tablerow i in (my_var..product.title[2]) %}{{ i }}{% else %}{% endtablerow %}"
-    )
+    test_combinator_error("{% tablerow i in (my_var..product.title[2]) %}{{ i }}{% else %}{% endtablerow %}")
 
-    test_combinator_error(
-      "{% tablerow i in products limit: a %}{{ i }}{% else %}{% endtablerow %}"
-    )
+    test_combinator_error("{% tablerow i in products limit: a %}{{ i }}{% else %}{% endtablerow %}")
   end
 end

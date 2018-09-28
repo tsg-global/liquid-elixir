@@ -5,6 +5,7 @@ defmodule Liquid.Parser do
   import NimbleParsec
 
   alias Liquid.Combinators.{General, LexicalToken}
+  alias Liquid.Combinators.Tags.Generic
   alias Liquid.Ast
 
   alias Liquid.Combinators.Tags.{
@@ -84,69 +85,76 @@ defmodule Liquid.Parser do
     :__parse__,
     empty()
     |> choice([
-      parsec(:liquid_variable),
-      # parsec(:custom_block),
-      # parsec(:custom_tag),
-      parsec(:liquid_tag)
+      parsec(:liquid_tag),
+      parsec(:liquid_variable)
     ])
   )
 
   defparsec(:assign, Assign.tag())
-  defparsec(:capture, Capture.tag2())
-  defparsec(:decrement, Decrement.tag())
+
   defparsec(:increment, Increment.tag())
 
-  defparsec(:comment_content, Comment.comment_content())
-  defparsec(:comment, Comment.tag())
+  defparsec(:decrement, Decrement.tag())
 
   defparsec(:cycle_values, Cycle.cycle_values())
   defparsec(:cycle, Cycle.tag())
 
-  defparsec(:end_block, EndBlock.tag())
+  defparsec(:include, Include.tag())
+
+  defparsec(:comment_content, Comment.comment_content())
+  defparsec(:comment, Comment.tag())
 
   defparsecp(:raw_content, Raw.raw_content())
   defparsec(:raw, Raw.tag())
 
-  defparsec(:ifchanged, Ifchanged.tag())
+  defparsec(:capture, Capture.tag2())
 
-  defparsec(:include, Include.tag())
-
-  defparsec(:body_elsif, If.body_elsif())
   defparsec(:if, If.tag2())
-  defparsec(:elsif_tag, If.elsif_tag())
+  defparsec(:elsif, If.elsif_tag2())
   defparsec(:unless, If.unless_tag2())
 
+  defparsec(:for, For.tag2())
   defparsec(:break_tag, For.break_tag())
   defparsec(:continue_tag, For.continue_tag())
-  defparsec(:for, For.tag())
+
+  defparsec(:ifchanged, Ifchanged.tag2())
 
   defparsec(:tablerow, Tablerow.tag2())
 
-  defparsec(:case, Case.tag())
-  defparsec(:clauses, Case.clauses())
-  defparsec(:custom_tag, CustomTag.tag())
-  defparsec(:custom_block, CustomBlock.block())
+  defparsec(:case, Case.tag2())
+  defparsec(:when, Case.when_tag2())
+
+  defparsec(:else, Generic.else_tag2())
+
+  defparsec(:custom, CustomTag.tag2())
+
+  defparsec(:end_block, EndBlock.tag())
 
   defparsec(
     :liquid_tag,
+    # The tag order affects the parser execution any change can break the app
     choice([
-      parsec(:assign),
-      parsec(:capture),
-      parsec(:increment),
-      parsec(:decrement),
-      parsec(:include),
-      parsec(:cycle),
       parsec(:raw),
       parsec(:comment),
       parsec(:if),
-      # parsec(:for),
-      # parsec(:break_tag),
-      # parsec(:continue_tag),
       parsec(:unless),
+      parsec(:for),
+      parsec(:case),
+      parsec(:capture),
       parsec(:tablerow),
+      parsec(:cycle),
+      parsec(:assign),
+      parsec(:increment),
+      parsec(:decrement),
+      parsec(:include),
+      parsec(:ifchanged),
+      parsec(:else),
+      parsec(:when),
+      parsec(:elsif),
+      parsec(:break_tag),
+      parsec(:continue_tag),
       parsec(:end_block),
-      # parsec(:case),
-      # parsec(:ifchanged)
+      parsec(:custom)
     ])
   )
 

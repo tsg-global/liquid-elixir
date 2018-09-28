@@ -59,9 +59,14 @@ defmodule Liquid.Combinators.Tags.Case do
   defp when_tag do
     "when"
     |> Tag.open_tag(&General.conditions/1)
-    |> tag(:conditions)
     |> concat(tag(optional(parsec(:__parse__)), :body))
     |> tag(:when)
+  end
+
+  def tag2, do: Tag.define_block("case", &General.conditions/1)
+
+  def when_tag2 do
+    Tag.define_sub_block("when", ["case"], &General.conditions/1)
   end
 
   defp body(combinator) do
