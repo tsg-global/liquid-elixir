@@ -113,7 +113,10 @@ defmodule Liquid.Combinators.Tags.CommentTest do
   end
 
   test "comment must fails with this one" do
-    test_combinator_error("{% comment %} {% if true %} {% comment %} {% aendcomment %} {% acomment %} {% endcomment %}")
+    test_combinator_error(
+      "{% comment %} {% if true %} {% comment %} {% aendcomment %} {% acomment %} {% endcomment %}"
+    )
+
     test_combinator_error("{% comment %}{%}{% endcomment %}")
     test_combinator_error("{% comment %} {% comment %} {% endcomment %}")
     test_combinator_error("{%comment%}{%comment%}{%endcomment%}")

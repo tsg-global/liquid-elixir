@@ -84,7 +84,9 @@ defmodule Liquid.CaseTest do
   end
 
   test "allows use of 'or' to chain parameters with {% when %}" do
-    template = "{% case condition %}" <> "{% when 1 or 2 or 3 %} its 1 or 2 or 3 " <> "{% when 4 %} its 4 {% endcase %}"
+    template =
+      "{% case condition %}" <>
+        "{% when 1 or 2 or 3 %} its 1 or 2 or 3 " <> "{% when 4 %} its 4 {% endcase %}"
 
     assert_result(" its 1 or 2 or 3 ", template, %{"condition" => 1})
     assert_result(" its 1 or 2 or 3 ", template, %{"condition" => 2})
@@ -94,7 +96,8 @@ defmodule Liquid.CaseTest do
 
     template =
       "{% case condition %}" <>
-        "{% when 1 or \"string\" or null %} its 1 or 2 or 3 " <> "{% when 4 %} its 4 {% endcase %}"
+        "{% when 1 or \"string\" or null %} its 1 or 2 or 3 " <>
+        "{% when 4 %} its 4 {% endcase %}"
 
     assert_result(" its 1 or 2 or 3 ", template, %{"condition" => 1})
     assert_result(" its 1 or 2 or 3 ", template, %{"condition" => "string"})
@@ -103,7 +106,9 @@ defmodule Liquid.CaseTest do
   end
 
   test "allows use of commas to chain parameters with {% when %} " do
-    template = "{% case condition %}" <> "{% when 1, 2, 3 %} its 1 or 2 or 3 " <> "{% when 4 %} its 4 {% endcase %}"
+    template =
+      "{% case condition %}" <>
+        "{% when 1, 2, 3 %} its 1 or 2 or 3 " <> "{% when 4 %} its 4 {% endcase %}"
 
     assert_result(" its 1 or 2 or 3 ", template, %{"condition" => 1})
     assert_result(" its 1 or 2 or 3 ", template, %{"condition" => 2})
@@ -112,7 +117,8 @@ defmodule Liquid.CaseTest do
     assert_result("", template, %{"condition" => 5})
 
     template =
-      "{% case condition %}" <> "{% when 1, \"string\", null %} its 1 or 2 or 3 " <> "{% when 4 %} its 4 {% endcase %}"
+      "{% case condition %}" <>
+        "{% when 1, \"string\", null %} its 1 or 2 or 3 " <> "{% when 4 %} its 4 {% endcase %}"
 
     assert_result(" its 1 or 2 or 3 ", template, %{"condition" => 1})
     assert_result(" its 1 or 2 or 3 ", template, %{"condition" => "string"})

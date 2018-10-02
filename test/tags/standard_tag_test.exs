@@ -279,11 +279,13 @@ defmodule StandardTagTest do
 
     template = Liquid.Template.parse(code)
 
-    {:ok, result, _} = Template.render(template, %{"collection" => %{"handle" => "menswear-jackets"}})
+    {:ok, result, _} =
+      Template.render(template, %{"collection" => %{"handle" => "menswear-jackets"}})
 
     assert "menswear" == result
 
-    {:ok, result, _} = Template.render(template, %{"collection" => %{"handle" => "menswear-t-shirts"}})
+    {:ok, result, _} =
+      Template.render(template, %{"collection" => %{"handle" => "menswear-t-shirts"}})
 
     assert "menswear" == result
     {:ok, result, _} = Template.render(template, %{"collection" => %{"handle" => "x"}})
@@ -295,7 +297,8 @@ defmodule StandardTagTest do
   end
 
   test :test_case_when_or do
-    code = "{% case condition %}{% when 1 or 2 or 3 %} its 1 or 2 or 3 {% when 4 %} its 4 {% endcase %}"
+    code =
+      "{% case condition %}{% when 1 or 2 or 3 %} its 1 or 2 or 3 {% when 4 %} its 4 {% endcase %}"
 
     assert_template_result(" its 1 or 2 or 3 ", code, %{"condition" => 1})
     assert_template_result(" its 1 or 2 or 3 ", code, %{"condition" => 2})
@@ -303,7 +306,8 @@ defmodule StandardTagTest do
     assert_template_result(" its 4 ", code, %{"condition" => 4})
     assert_template_result("", code, %{"condition" => 5})
 
-    code = "{% case condition %}{% when 1 or \"string\" or null %} its 1 or 2 or 3 {% when 4 %} its 4 {% endcase %}"
+    code =
+      "{% case condition %}{% when 1 or \"string\" or null %} its 1 or 2 or 3 {% when 4 %} its 4 {% endcase %}"
 
     assert_template_result(" its 1 or 2 or 3 ", code, %{"condition" => 1})
     assert_template_result(" its 1 or 2 or 3 ", code, %{"condition" => "string"})
@@ -312,7 +316,8 @@ defmodule StandardTagTest do
   end
 
   test :test_case_when_comma do
-    code = "{% case condition %}{% when 1, 2, 3 %} its 1 or 2 or 3 {% when 4 %} its 4 {% endcase %}"
+    code =
+      "{% case condition %}{% when 1, 2, 3 %} its 1 or 2 or 3 {% when 4 %} its 4 {% endcase %}"
 
     assert_template_result(" its 1 or 2 or 3 ", code, %{"condition" => 1})
     assert_template_result(" its 1 or 2 or 3 ", code, %{"condition" => 2})
@@ -320,7 +325,8 @@ defmodule StandardTagTest do
     assert_template_result(" its 4 ", code, %{"condition" => 4})
     assert_template_result("", code, %{"condition" => 5})
 
-    code = "{% case condition %}{% when 1, \"string\", null %} its 1 or 2 or 3 {% when 4 %} its 4 {% endcase %}"
+    code =
+      "{% case condition %}{% when 1, \"string\", null %} its 1 or 2 or 3 {% when 4 %} its 4 {% endcase %}"
 
     assert_template_result(" its 1 or 2 or 3 ", code, %{"condition" => 1})
     assert_template_result(" its 1 or 2 or 3 ", code, %{"condition" => "string"})

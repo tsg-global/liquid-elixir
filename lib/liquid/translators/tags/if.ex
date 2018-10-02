@@ -14,8 +14,14 @@ defmodule Liquid.Translators.Tags.If do
     create_block_if(name, "\"#{Markup.literal(value)}\"", body)
   end
 
-  def translate(name, [{:conditions, [value]}, {:body, body_parts} | elselist]) when is_bitstring(value) do
-    create_block_if(name, "\"#{Markup.literal(value)}\"", body_parts, normalize_elselist(elselist))
+  def translate(name, [{:conditions, [value]}, {:body, body_parts} | elselist])
+      when is_bitstring(value) do
+    create_block_if(
+      name,
+      "\"#{Markup.literal(value)}\"",
+      body_parts,
+      normalize_elselist(elselist)
+    )
   end
 
   def translate(name, conditions: conditions, body: body) do
@@ -23,7 +29,12 @@ defmodule Liquid.Translators.Tags.If do
   end
 
   def translate(name, [{:conditions, conditions}, {:body, body_parts} | elselist]) do
-    create_block_if(name, "#{Markup.literal(conditions)}", body_parts, normalize_elselist(elselist))
+    create_block_if(
+      name,
+      "#{Markup.literal(conditions)}",
+      body_parts,
+      normalize_elselist(elselist)
+    )
   end
 
   defp normalize_elselist([{:elsif, _} | [_]] = else_list) do
@@ -35,7 +46,14 @@ defmodule Liquid.Translators.Tags.If do
 
           _ ->
             {tag, params} = last
-            final_list = List.replace_at(list, length(list) - 1, {tag, Enum.reverse([x | Enum.reverse(params)])})
+
+            final_list =
+              List.replace_at(
+                list,
+                length(list) - 1,
+                {tag, Enum.reverse([x | Enum.reverse(params)])}
+              )
+
             {:halt, {final_list, nil}}
         end
       end)

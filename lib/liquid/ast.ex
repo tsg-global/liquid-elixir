@@ -22,13 +22,23 @@ defmodule Liquid.Ast do
   @spec build({:error, binary(), binary()}) :: {:error, binary(), binary()}
   def build({:error, error_message, rest_markup}), do: {:error, error_message, rest_markup}
 
-  defp parse_liquid(markup, context, ast), do: markup |> Parser.__parse__(context: context) |> do_parse_liquid(ast)
+  defp parse_liquid(markup, context, ast),
+    do: markup |> Parser.__parse__(context: context) |> do_parse_liquid(ast)
+
   defp do_parse_liquid({:ok, [{:error, message}], rest, _, _, _}, _), do: {:error, message, rest}
   defp do_parse_liquid({:ok, [{:block, _}], _, _, _, _} = liquid, ast), do: block(liquid, ast)
-  defp do_parse_liquid({:ok, [{:sub_block, _}] = tag, rest, context, _, _}, ast), do: {:ok, [tag | ast], context, rest}
-  defp do_parse_liquid({:ok, [{:end_block, _}] = tag, rest, context, _, _}, ast), do: {:ok, [tag | ast], context, rest}
-  defp do_parse_liquid({:ok, [tags], rest, context, _, _}, ast), do: build(rest, context, [tags | ast])
+
+  defp do_parse_liquid({:ok, [{:sub_block, _}] = tag, rest, context, _, _}, ast),
+    do: {:ok, [tag | ast], context, rest}
+
+  defp do_parse_liquid({:ok, [{:end_block, _}] = tag, rest, context, _, _}, ast),
+    do: {:ok, [tag | ast], context, rest}
+
+  defp do_parse_liquid({:ok, [tags], rest, context, _, _}, ast),
+    do: build(rest, context, [tags | ast])
+
   defp do_parse_liquid({:error, message, rest, _, _, _}, _), do: {:error, message, rest}
 
-  defp block({:ok, [{:block, [tag]}], markup, context, _, _}, ast), do: Block.build(markup, tag, [], [], context, ast)
+  defp block({:ok, [{:block, [tag]}], markup, context, _, _}, ast),
+    do: Block.build(markup, tag, [], [], context, ast)
 end

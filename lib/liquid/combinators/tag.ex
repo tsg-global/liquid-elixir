@@ -25,6 +25,7 @@ defmodule Liquid.Combinators.Tag do
       #=> {:ok, {:ignorable, [12]}, "", %{}, {1, 0}, 2}
   """
   def define_closed(tag_name, combinator_head \\ & &1, combinator_body \\ & &1, separator \\ " ")
+
   def define_closed(tag_name, combinator_head, combinator_body, separator) do
     tag_name
     |> open_tag(combinator_head, separator)
@@ -51,6 +52,7 @@ defmodule Liquid.Combinators.Tag do
   end
 
   def define_block(tag_name, combinator_head \\ & &1, separator \\ " ")
+
   def define_block(tag_name, combinator_head, separator) do
     tag_name
     |> open_tag(combinator_head, separator)
@@ -67,6 +69,7 @@ defmodule Liquid.Combinators.Tag do
   end
 
   def open_tag(tag_name, combinator \\ & &1, separator \\ " ")
+
   def open_tag(tag_name, combinator, separator) do
     empty()
     |> parsec(:start_tag)

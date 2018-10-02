@@ -24,7 +24,11 @@ defmodule Liquid.ParserTest do
   end
 
   test "test literal + liquid open tag + literal" do
-    test_parse("Hello {% assign a = 5 %} Hello", ["Hello ", {:assign, [variable_name: "a", value: 5]}, " Hello"])
+    test_parse("Hello {% assign a = 5 %} Hello", [
+      "Hello ",
+      {:assign, [variable_name: "a", value: 5]},
+      " Hello"
+    ])
   end
 
   test "test multiple open tags" do
@@ -42,7 +46,9 @@ defmodule Liquid.ParserTest do
   end
 
   test "empty closed tag" do
-    test_parse("{% capture variable %}{% endcapture %}", [{:capture, [variable_name: "variable", body: []]}])
+    test_parse("{% capture variable %}{% endcapture %}", [
+      {:capture, [variable_name: "variable", body: []]}
+    ])
   end
 
   test "tag without open" do
@@ -81,7 +87,8 @@ defmodule Liquid.ParserTest do
 
   test "literal and tag inside block" do
     test_parse("{% capture x %}X{% decrement x %}{% endcapture %}", [
-      {:capture, [variable_name: "x", body: ["X", {:decrement, [variable: [parts: [part: "x"]]]}]]}
+      {:capture,
+       [variable_name: "x", body: ["X", {:decrement, [variable: [parts: [part: "x"]]]}]]}
     ])
   end
 
@@ -128,7 +135,9 @@ defmodule Liquid.ParserTest do
   end
 
   test "bad endblock" do
-    test_combinator_error("{% capture variable %}{% capture internal_variable %}{% endif %}{% endcapture %}")
+    test_combinator_error(
+      "{% capture variable %}{% capture internal_variable %}{% endif %}{% endcapture %}"
+    )
   end
 
   test "if block" do
@@ -136,10 +145,12 @@ defmodule Liquid.ParserTest do
       "{% if a == b or c == d %}Hello{% endif %}",
       if: [
         conditions: [
-          {:condition, {{:variable, [parts: [part: "a"]]}, :==, {:variable, [parts: [part: "b"]]}}},
+          {:condition,
+           {{:variable, [parts: [part: "a"]]}, :==, {:variable, [parts: [part: "b"]]}}},
           logical: [
             :or,
-            {:condition, {{:variable, [parts: [part: "c"]]}, :==, {:variable, [parts: [part: "d"]]}}}
+            {:condition,
+             {{:variable, [parts: [part: "c"]]}, :==, {:variable, [parts: [part: "d"]]}}}
           ]
         ],
         body: ["Hello"]
@@ -210,16 +221,19 @@ defmodule Liquid.ParserTest do
       "{% if a == b or c == d %}Hello{% elsif z > x %}bye{% endif %}",
       if: [
         conditions: [
-          {:condition, {{:variable, [parts: [part: "a"]]}, :==, {:variable, [parts: [part: "b"]]}}},
+          {:condition,
+           {{:variable, [parts: [part: "a"]]}, :==, {:variable, [parts: [part: "b"]]}}},
           logical: [
             :or,
-            {:condition, {{:variable, [parts: [part: "c"]]}, :==, {:variable, [parts: [part: "d"]]}}}
+            {:condition,
+             {{:variable, [parts: [part: "c"]]}, :==, {:variable, [parts: [part: "d"]]}}}
           ]
         ],
         body: ["Hello"],
         elsif: [
           conditions: [
-            {:condition, {{:variable, [parts: [part: "z"]]}, :>, {:variable, [parts: [part: "x"]]}}}
+            {:condition,
+             {{:variable, [parts: [part: "z"]]}, :>, {:variable, [parts: [part: "x"]]}}}
           ],
           body: ["bye"]
         ]
@@ -233,7 +247,10 @@ defmodule Liquid.ParserTest do
       if: [
         conditions: [true],
         body: ["Hello"],
-        elsif: [conditions: [true], body: ["second", {:decrement, [variable: [parts: [part: "a"]]]}, "third"]],
+        elsif: [
+          conditions: [true],
+          body: ["second", {:decrement, [variable: [parts: [part: "a"]]]}, "third"]
+        ],
         elsif: [conditions: [false], body: ["bye"]],
         else: [body: ["clear"]]
       ]
@@ -338,7 +355,9 @@ defmodule Liquid.ParserTest do
   end
 
   test "custom tag from example(almost random now :)" do
-    test_parse("{% minus_one  5 %}", custom: [{:custom_name, ["minus_one"]}, {:custom_markup, "5 "}])
+    test_parse("{% minus_one  5 %}",
+      custom: [{:custom_name, ["minus_one"]}, {:custom_markup, "5 "}]
+    )
   end
 
   test "custom block from example(almost random now :)" do

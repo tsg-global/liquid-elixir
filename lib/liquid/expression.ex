@@ -35,7 +35,8 @@ defmodule Liquid.Expression do
 
       # Ranges
       Regex.match?(~r/\A\((\S+)\.\.(\S+)\)\z/, markup) ->
-        [left_range, right_range] = Regex.run(~r/\A\((\S+)\.\.(\S+)\)\z/, markup, capture: :all_but_first)
+        [left_range, right_range] =
+          Regex.run(~r/\A\((\S+)\.\.(\S+)\)\z/, markup, capture: :all_but_first)
 
         RangeLookup.parse(left_range, right_range)
 

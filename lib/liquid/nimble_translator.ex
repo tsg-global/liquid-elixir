@@ -55,27 +55,66 @@ defmodule Liquid.NimbleTranslator do
   def process_node({tag, markup}) do
     translated =
       case tag do
-        :liquid_variable -> LiquidVariable.translate(markup)
-        :assign -> Assign.translate(markup)
-        :capture -> Capture.translate(markup)
-        :comment -> Comment.translate(markup)
-        :cycle -> Cycle.translate(markup)
-        :decrement -> Decrement.translate(markup)
-        :for -> For.translate(markup)
-        :if -> If.translate(:if, markup)
-        :unless -> If.translate(:unless, markup)
-        :elsif -> If.translate(:if, markup)
-        :else -> [body: body_parts] = markup
-        process_node(body_parts)
-        :include -> Include.translate(markup)
-        :increment -> Increment.translate(markup)
-        :tablerow -> Tablerow.translate(markup)
-        :ifchanged -> Ifchanged.translate(markup)
-        :raw -> Raw.translate(markup)
-        :break -> Break.translate(markup)
-        :continue -> Continue.translate(markup)
-        :case -> Case.translate(markup)
-        :custom -> CustomTag.translate(markup)
+        :liquid_variable ->
+          LiquidVariable.translate(markup)
+
+        :assign ->
+          Assign.translate(markup)
+
+        :capture ->
+          Capture.translate(markup)
+
+        :comment ->
+          Comment.translate(markup)
+
+        :cycle ->
+          Cycle.translate(markup)
+
+        :decrement ->
+          Decrement.translate(markup)
+
+        :for ->
+          For.translate(markup)
+
+        :if ->
+          If.translate(:if, markup)
+
+        :unless ->
+          If.translate(:unless, markup)
+
+        :elsif ->
+          If.translate(:if, markup)
+
+        :else ->
+          [body: body_parts] = markup
+          process_node(body_parts)
+
+        :include ->
+          Include.translate(markup)
+
+        :increment ->
+          Increment.translate(markup)
+
+        :tablerow ->
+          Tablerow.translate(markup)
+
+        :ifchanged ->
+          Ifchanged.translate(markup)
+
+        :raw ->
+          Raw.translate(markup)
+
+        :break ->
+          Break.translate(markup)
+
+        :continue ->
+          Continue.translate(markup)
+
+        :case ->
+          Case.translate(markup)
+
+        :custom ->
+          CustomTag.translate(markup)
       end
 
     check_blank(translated)
