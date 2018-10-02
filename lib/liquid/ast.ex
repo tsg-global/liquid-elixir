@@ -31,8 +31,20 @@ defmodule Liquid.Ast do
   defp do_parse_liquid({:ok, [{:sub_block, _}] = tag, rest, context, _, _}, ast),
     do: {:ok, [tag | ast], context, rest}
 
-  defp do_parse_liquid({:ok, [{:end_block, _}] = tag, rest, context, _, _}, ast),
-    do: {:ok, [tag | ast], context, rest}
+  defp do_parse_liquid({:ok, [{:end_block, [{_, [tag]}]}], rest, %{tags: []}, _, _}, _),
+    do: {:error, "The tag '#{tag}' was not opened", rest}
+
+  defp do_parse_liquid(
+         {:ok, [{:end_block, [{_, [tag_name]}]}] = tag, rest,
+          %{tags: [last_tag | tags]} = context, _, _},
+         ast
+       )
+       when tag_name == last_tag do
+    {:ok, [tag | ast], %{context | tags: tags}, rest}
+  end
+
+  defp do_parse_liquid({:ok, [{:end_block, _}], rest, %{tags: [last_tag | _]}, _, _}, _),
+    do: {:error, "The '#{last_tag}' tag has not been correctly closed", rest}
 
   defp do_parse_liquid({:ok, [tags], rest, context, _, _}, ast),
     do: build(rest, context, [tags | ast])
