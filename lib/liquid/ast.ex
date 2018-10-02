@@ -11,8 +11,8 @@ defmodule Liquid.Ast do
   Recursively builds the AST taking a markup, or a tuple with a literal and a rest markup.
   It uses `context` to validate the correct opening and close of blocks and sub blocks.
   """
-  @spec build(String.t() | {String.t(), String.t()}, Keyword.t(), List.t()) ::
-          {:ok, List.t(), Keyword.t(), String.t()} | {:error, String.t(), String.t()}
+  @spec build(binary() | {binary(), binary()}, Keyword.t(), list()) ::
+          {:ok, list(), Keyword.t(), binary()} | {:error, binary(), binary()}
   def build({literal, ""}, context, ast), do: {:ok, Enum.reverse([literal | ast]), context, ""}
   def build({"", markup}, context, ast), do: parse_liquid(markup, context, ast)
   def build({literal, markup}, context, ast), do: parse_liquid(markup, context, [literal | ast])

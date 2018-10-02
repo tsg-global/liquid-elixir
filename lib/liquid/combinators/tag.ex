@@ -61,6 +61,10 @@ defmodule Liquid.Combinators.Tag do
     |> tag(String.to_atom(tag_name))
   end
 
+  @doc """
+  Creates a new combinator to parse subblocks (else, elsif, when)
+  """
+  @spec define_sub_block(binary(), list(), function()) :: function()
   def define_sub_block(tag_name, allowed_tags, combinator \\ & &1) do
     empty()
     |> parsec(:start_tag)
@@ -72,6 +76,10 @@ defmodule Liquid.Combinators.Tag do
     |> traverse({__MODULE__, :check_allowed_tags, [allowed_tags]})
   end
 
+  @doc """
+  Creates a new combinator to parse blocks (if, for, tablerow, etc)
+  """
+  @spec define_block(binary(), function(), binary()) :: function()
   def define_block(tag_name, combinator_head \\ & &1, separator \\ " ")
 
   def define_block(tag_name, combinator_head, separator) do
@@ -82,6 +90,11 @@ defmodule Liquid.Combinators.Tag do
     |> traverse({__MODULE__, :store_tag_in_context, []})
   end
 
+  @doc """
+  Creates a new combinator to parse open tags.
+  An open tag is a open tag symbol `{%` and a name
+  """
+  @spec open_tag(binary(), function(), binary()) :: function()
   def open_tag(tag_name, combinator \\ & &1, separator \\ " ")
 
   def open_tag(tag_name, combinator, separator) do
@@ -92,6 +105,11 @@ defmodule Liquid.Combinators.Tag do
     |> parsec(:end_tag)
   end
 
+  @doc """
+  Creates a new combinator to parse the close of tags.
+  The close of a tag is a close tag symbol `%}`
+  """
+  @spec close_tag(function(), binary()) :: function()
   def close_tag(combinator \\ empty(), tag_name) do
     combinator
     |> parsec(:start_tag)
@@ -103,12 +121,16 @@ defmodule Liquid.Combinators.Tag do
     {acc, %{context | tags: [to_string(tag_name) | tags]}}
   end
 
-  def check_allowed_tags(_, acc, %{tags: []} = context, _, _, _) do
+  @doc """
+  Returns a valid tag when the tag is inside an allowed tag, else returns an error
+  """
+  @spec check_allowed_tags(binary(), list(), tuple(), tuple(), integer(), list()) :: tuple()
+  def check_allowed_tags(_rest, acc, %{tags: []} = context, _line, _offset, _allowed_tags) do
     tag_name = tag_name(acc)
     {[error: "Unexpected outer '#{tag_name}' tag"], context}
   end
 
-  def check_allowed_tags(_, acc, %{tags: [tag | _]} = context, _, _, allowed_tags) do
+  def check_allowed_tags(_rest, acc, %{tags: [tag | _]} = context, _line, _offset, allowed_tags) do
     tag_name = tag_name(acc)
 
     if Enum.member?(allowed_tags, tag) do
