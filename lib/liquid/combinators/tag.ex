@@ -5,25 +5,25 @@ defmodule Liquid.Combinators.Tag do
   import NimbleParsec
 
   @doc """
-  Define a tag from a tag_name and, optionally, a function to parse tag parameters,
-  the tag and a function to parse the body inside the tag
+  Define a block from a tag_name and, optionally, a function to parse tag parameters,
+  and a function to parse the body inside the tag
   Both functions must receive a combinator and must return a combinator
 
   The returned tag is a combinator which expect a start tag `{%` a tag name and a end tag `%}`
 
   ## Examples
 
-      defmodule MyParser do
-        import NimbleParsec
-        alias Liquid.Combinators.Tag
-
-        def ignorable, do: Tag.define(
-          "ignorable",
-          fn combinator -> combinator |> string("T") |> ignore() |> integer(2,2))
-
-      MyParser.ignorable("{% ignorable T12 %}")
-      #=> {:ok, {:ignorable, [12]}, "", %{}, {1, 0}, 2}
+  Tag.define_closed(
+  "comment",
+  & &1,
+  fn combinator ->
+  combinator
+  |> optional(parsec(:comment_content))
+  |> reduce({Markup, :literal, []})
+  end,
+  ""
   """
+  @spec define_closed(String.t(), fun(), fun(), String.t()) :: fun()
   def define_closed(tag_name, combinator_head \\ & &1, combinator_body \\ & &1, separator \\ " ")
 
   def define_closed(tag_name, combinator_head, combinator_body, separator) do
@@ -34,6 +34,27 @@ defmodule Liquid.Combinators.Tag do
     |> tag(String.to_atom(tag_name))
   end
 
+  @doc """
+  Define a tag from a tag_name and, optionally, a function to parse tag parameters,
+  the tag and a function to parse the body inside the tag
+  Both functions must receive a combinator and must return a combinator
+
+  The returned tag is a combinator which expect a start tag `{%` a tag name and a end tag `%}`
+
+  ## Examples
+
+  defmodule MyParser do
+  import NimbleParsec
+  alias Liquid.Combinators.Tag
+
+  def ignorable, do: Tag.define_closed(
+  "ignorable",
+  fn combinator -> combinator |> string("T") |> ignore() |> integer(2,2))
+
+  MyParser.ignorable("{% ignorable T12 %}")
+  #=> {:ok, {:ignorable, [12]}, "", %{}, {1, 0}, 2}
+  """
+  @spec define_open(String.t(), fun()) :: fun()
   def define_open(tag_name, combinator_head \\ & &1) do
     tag_name
     |> open_tag(combinator_head)
@@ -61,13 +82,6 @@ defmodule Liquid.Combinators.Tag do
     |> traverse({__MODULE__, :store_tag_in_context, []})
   end
 
-  def define_inverse_open(tag_name, combinator_head \\ & &1) do
-    tag_name
-    |> open_tag(combinator_head)
-    |> optional(parsec(:__parse__))
-    |> tag(String.to_atom(tag_name))
-  end
-
   def open_tag(tag_name, combinator \\ & &1, separator \\ " ")
 
   def open_tag(tag_name, combinator, separator) do
@@ -85,9 +99,8 @@ defmodule Liquid.Combinators.Tag do
     |> parsec(:end_tag)
   end
 
-  def store_tag_in_context(_rest, [{:block, tag}] = acc, %{tags: tags} = context, _line, _offset) do
-    tag_name = tag |> Keyword.keys() |> hd() |> to_string()
-    {acc, %{context | tags: [tag_name | tags]}}
+  def store_tag_in_context(_, [{:block, [{tag_name, _}]}] = acc, %{tags: tags} = context, _, _) do
+    {acc, %{context | tags: [to_string(tag_name) | tags]}}
   end
 
   def check_allowed_tags(_, acc, %{tags: []} = context, _, _, _) do
