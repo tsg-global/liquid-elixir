@@ -31,7 +31,7 @@ defmodule Liquid.Combinators.Tags.CustomTag do
     |> traverse({__MODULE__, :check_customs, []})
   end
 
-  def check_customs(_, [params | tag], %{tags: tags} = context, _, _) do
+  def check_customs(_rest, [params | tag], %{tags: tags} = context, _line, _offset) do
     [tag_name] = tag
     name = String.to_atom(tag_name)
 
@@ -60,7 +60,7 @@ defmodule Liquid.Combinators.Tags.CustomTag do
     |> unwrap_and_tag(:custom_markup)
   end
 
-  defp valid_markup() do
+  defp valid_markup do
     repeat_until(utf8_char([]), [string("{%"), string("%}"), string("{{"), string("}}")])
   end
 end
