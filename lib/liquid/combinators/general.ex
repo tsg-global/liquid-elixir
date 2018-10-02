@@ -391,7 +391,8 @@ defmodule Liquid.Combinators.General do
   end
 
   @doc """
-  Parses a `Liquid` Custom tag's name, isolates custom tag name from markup.
+  Parses a `Liquid` tag name, isolates tag name from markup. It represents the tag name parsed
+  until end tag `%}`
   """
   @spec valid_tag_name() :: NimbleParsec.t()
   def valid_tag_name do
