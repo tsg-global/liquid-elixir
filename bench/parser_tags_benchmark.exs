@@ -57,7 +57,7 @@ benchmarks =
 Benchee.run(
   benchmarks,
   warmup: 5,
-  time: 20,
+  time: 60,
   print: [
     benchmarking: true,
     configuration: false,
