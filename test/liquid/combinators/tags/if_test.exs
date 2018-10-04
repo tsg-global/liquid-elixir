@@ -24,7 +24,7 @@ defmodule Liquid.Combinators.Tags.IfTest do
   test "if else " do
     test_parse(
       "{% if \"foo\" %} YES {% else %} NO {% endif %}",
-      if: [conditions: ["foo"], body: [" YES ", {:else, [" NO "]}]]
+      if: [conditions: ["foo"], body: [" YES "], else: [body: [" NO "]]]
     )
   end
 
@@ -116,34 +116,19 @@ defmodule Liquid.Combinators.Tags.IfTest do
           if: [
             conditions: [
               condition:
-                {{:variable,
-                  [
-                    parts: [
-                      part: "shipping_method",
-                      part: "title"
-                    ]
-                  ]}, :==, "International Shipping"}
+                {{:variable, [parts: [part: "shipping_method", part: "title"]]}, :==,
+                 "International Shipping"}
             ],
-            body: [
-              "You're shipping internationally. Your order should arrive in 2–3 weeks.",
-              {:elsif,
-               [
-                 conditions: [
-                   condition:
-                     {{:variable,
-                       [
-                         parts: [
-                           part: "shipping_method",
-                           part: "title"
-                         ]
-                       ]}, :==, "Domestic Shipping"}
-                 ],
-                 body: [
-                   "Your order should arrive in 3–4 days.",
-                   {:else, [" Thank you for your order!"]}
-                 ]
-               ]}
-            ]
+            body: ["You're shipping internationally. Your order should arrive in 2–3 weeks."],
+            elsif: [
+              conditions: [
+                condition:
+                  {{:variable, [parts: [part: "shipping_method", part: "title"]]}, :==,
+                   "Domestic Shipping"}
+              ],
+              body: ["Your order should arrive in 3–4 days."]
+            ],
+            else: [body: [" Thank you for your order!"]]
           ]
         ]
       ]
@@ -167,7 +152,8 @@ defmodule Liquid.Combinators.Tags.IfTest do
       "{% if    'bob'     contains     'f'     %}yes{% else %}no{% endif %}",
       if: [
         conditions: [condition: {"bob", :contains, "f"}],
-        body: ["yes", {:else, ["no"]}]
+        body: ["yes"],
+        else: [body: ["no"]]
       ]
     )
   end
@@ -181,21 +167,16 @@ defmodule Liquid.Combinators.Tags.IfTest do
             {{:variable, [parts: [part: "shipping_method", part: "title"]]}, :==,
              "International Shipping"}
         ],
-        body: [
-          "You're shipping internationally. Your order should arrive in 2–3 weeks.",
-          {:elsif,
-           [
-             conditions: [
-               condition:
-                 {{:variable, [parts: [part: "shipping_method", part: "title"]]}, :==,
-                  "Domestic Shipping"}
-             ],
-             body: [
-               "Your order should arrive in 3–4 days.",
-               {:else, [" Thank you for your order!"]}
-             ]
-           ]}
-        ]
+        body: ["You're shipping internationally. Your order should arrive in 2–3 weeks."],
+        elsif: [
+          conditions: [
+            condition:
+              {{:variable, [parts: [part: "shipping_method", part: "title"]]}, :==,
+               "Domestic Shipping"}
+          ],
+          body: ["Your order should arrive in 3–4 days."]
+        ],
+        else: [body: [" Thank you for your order!"]]
       ]
     )
   end
@@ -205,7 +186,9 @@ defmodule Liquid.Combinators.Tags.IfTest do
       "{% if true %}test{% else %} a {% else %} b {% endif %}",
       if: [
         conditions: [true],
-        body: ["test", {:else, [" a "]}, {:else, [" b "]}]
+        body: ["test"],
+        else: [body: [" a "]],
+        else: [body: [" b "]]
       ]
     )
   end

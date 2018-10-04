@@ -387,5 +387,26 @@ defmodule Liquid.Combinators.General do
       parsec(:variable_definition)
     ])
     |> optional(times(parsec(:logical_condition), min: 1))
+    |> tag(:conditions)
+  end
+
+  @doc """
+  Parses a `Liquid` tag name, isolates tag name from markup. It represents the tag name parsed
+  until end tag `%}`
+  """
+  @spec valid_tag_name() :: NimbleParsec.t()
+  def valid_tag_name do
+    empty()
+    |> repeat_until(utf8_char([]), [
+      string(" "),
+      string("%}"),
+      ascii_char([
+        @horizontal_tab,
+        @carriage_return,
+        @newline,
+        @space
+      ])
+    ])
+    |> reduce({List, :to_string, []})
   end
 end

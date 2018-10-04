@@ -58,9 +58,7 @@ defmodule Liquid.Combinators.Tags.Tablerow do
   """
   @spec tag() :: NimbleParsec.t()
   def tag do
-    Tag.define_closed("tablerow", &statements/1, fn combinator ->
-      optional(combinator, parsec(:__parse__) |> tag(:body))
-    end)
+    Tag.define_block("tablerow", &statements/1)
   end
 
   defp params do

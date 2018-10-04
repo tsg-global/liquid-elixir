@@ -45,11 +45,16 @@ defmodule Liquid.Combinators.Tags.Comment do
   """
   @spec tag() :: NimbleParsec.t()
   def tag do
-    Tag.define_closed("comment", & &1, fn combinator ->
-      combinator
-      |> optional(parsec(:comment_content))
-      |> reduce({Markup, :literal, []})
-    end)
+    Tag.define_closed(
+      "comment",
+      & &1,
+      fn combinator ->
+        combinator
+        |> optional(parsec(:comment_content))
+        |> reduce({Markup, :literal, []})
+      end,
+      ""
+    )
   end
 
   @doc """

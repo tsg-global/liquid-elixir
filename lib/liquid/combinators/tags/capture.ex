@@ -17,7 +17,7 @@ defmodule Liquid.Combinators.Tags.Capture do
 
   @type markup :: [
           variable_name: String.t(),
-          parts: Liquid.NimbleParser.t()
+          body: Liquid.NimbleParser.t()
         ]
 
   @doc """
@@ -27,15 +27,11 @@ defmodule Liquid.Combinators.Tags.Capture do
   """
   @spec tag() :: NimbleParsec.t()
   def tag do
-    Tag.define_closed(
-      "capture",
-      fn combinator ->
-        choice(combinator, [
-          parsec(:quoted_variable_name),
-          parsec(:variable_name)
-        ])
-      end,
-      fn combinator -> optional(combinator, parsec(:__parse__) |> tag(:parts)) end
-    )
+    Tag.define_block("capture", fn combinator ->
+      choice(combinator, [
+        parsec(:quoted_variable_name),
+        parsec(:variable_name)
+      ])
+    end)
   end
 end

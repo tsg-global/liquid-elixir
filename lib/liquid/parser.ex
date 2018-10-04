@@ -1,15 +1,18 @@
-defmodule Liquid.NimbleParser do
+defmodule Liquid.Parser do
   @moduledoc """
   Transform a valid liquid markup in an AST to be executed by `render`.
   """
   import NimbleParsec
 
   alias Liquid.Combinators.{General, LexicalToken}
+  alias Liquid.Combinators.Tags.Generic
+  alias Liquid.Ast
 
   alias Liquid.Combinators.Tags.{
     Assign,
     Comment,
     Decrement,
+    EndBlock,
     Increment,
     Include,
     Raw,
@@ -20,8 +23,7 @@ defmodule Liquid.NimbleParser do
     Case,
     Capture,
     Ifchanged,
-    CustomTag,
-    CustomBlock
+    CustomTag
   }
 
   @type t :: [
@@ -45,7 +47,6 @@ defmodule Liquid.NimbleParser do
           | String.t()
         ]
 
-  defparsec(:liquid_literal, General.liquid_literal())
   defparsec(:liquid_variable, General.liquid_variable())
   defparsec(:variable_definition, General.variable_definition())
   defparsec(:variable_name, General.variable_name())
@@ -83,68 +84,76 @@ defmodule Liquid.NimbleParser do
     :__parse__,
     empty()
     |> choice([
-      parsec(:liquid_literal),
       parsec(:liquid_tag),
-      parsec(:liquid_variable),
-      parsec(:custom_block),
-      parsec(:custom_tag)
+      parsec(:liquid_variable)
     ])
-    |> optional(parsec(:__parse__))
   )
 
   defparsec(:assign, Assign.tag())
-  defparsec(:capture, Capture.tag())
-  defparsec(:decrement, Decrement.tag())
+
   defparsec(:increment, Increment.tag())
 
-  defparsec(:comment_content, Comment.comment_content())
-  defparsec(:comment, Comment.tag())
+  defparsec(:decrement, Decrement.tag())
 
   defparsec(:cycle_values, Cycle.cycle_values())
   defparsec(:cycle, Cycle.tag())
 
+  defparsec(:include, Include.tag())
+
+  defparsec(:comment_content, Comment.comment_content())
+  defparsec(:comment, Comment.tag())
+
   defparsecp(:raw_content, Raw.raw_content())
   defparsec(:raw, Raw.tag())
 
-  defparsec(:ifchanged, Ifchanged.tag())
+  defparsec(:capture, Capture.tag())
 
-  defparsec(:include, Include.tag())
-
-  defparsec(:body_elsif, If.body_elsif())
   defparsec(:if, If.tag())
-  defparsec(:elsif_tag, If.elsif_tag())
+  defparsec(:elsif, If.elsif_tag())
   defparsec(:unless, If.unless_tag())
 
+  defparsec(:for, For.tag())
   defparsec(:break_tag, For.break_tag())
   defparsec(:continue_tag, For.continue_tag())
-  defparsec(:for, For.tag())
+
+  defparsec(:ifchanged, Ifchanged.tag())
 
   defparsec(:tablerow, Tablerow.tag())
 
   defparsec(:case, Case.tag())
-  defparsec(:clauses, Case.clauses())
-  defparsec(:custom_tag, CustomTag.tag())
-  defparsec(:custom_block, CustomBlock.block())
+  defparsec(:when, Case.when_tag())
+
+  defparsec(:else, Generic.else_tag())
+
+  defparsec(:custom, CustomTag.tag())
+
+  defparsec(:end_block, EndBlock.tag())
 
   defparsec(
     :liquid_tag,
+    # The tag order affects the parser execution any change can break the app
     choice([
-      parsec(:assign),
+      parsec(:raw),
+      parsec(:comment),
+      parsec(:if),
+      parsec(:unless),
+      parsec(:for),
+      parsec(:case),
       parsec(:capture),
+      parsec(:tablerow),
+      parsec(:cycle),
+      parsec(:assign),
       parsec(:increment),
       parsec(:decrement),
       parsec(:include),
-      parsec(:cycle),
-      parsec(:raw),
-      parsec(:comment),
-      parsec(:for),
+      parsec(:ifchanged),
+      parsec(:else),
+      parsec(:when),
+      parsec(:elsif),
       parsec(:break_tag),
       parsec(:continue_tag),
-      parsec(:if),
-      parsec(:unless),
-      parsec(:tablerow),
-      parsec(:case),
-      parsec(:ifchanged)
+      parsec(:end_block),
+      parsec(:custom)
     ])
   )
 
@@ -152,18 +161,16 @@ defmodule Liquid.NimbleParser do
   Validates and parse liquid markup.
   """
   @spec parse(String.t()) :: {:ok | :error, any()}
-  def parse(""), do: {:ok, []}
-
   def parse(markup) do
-    case __parse__(markup) do
-      {:ok, template, "", _, _, _} ->
+    case Ast.build(markup, %{tags: []}, []) do
+      {:ok, template, %{tags: []}, ""} ->
         {:ok, template}
 
-      {:error, message, _, _, _, _} ->
-        {:error, "#{message}"}
+      {:ok, _, %{tags: [unclosed | _]}, ""} ->
+        {:error, "Malformed tag, open without close: '#{unclosed}'", ""}
 
-      {:ok, _, incorrect_markup, _, _, _} ->
-        {:error, "Error parsing: #{incorrect_markup}"}
+      {:error, message, rest_markup} ->
+        {:error, message, rest_markup}
     end
   end
 end
